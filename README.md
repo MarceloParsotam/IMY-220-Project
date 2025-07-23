@@ -1,5 +1,5 @@
 # IMY-220-Project
-
+![Logo](assets/logo.jpg)
 ---
 
 ## Introduction
