@@ -27,8 +27,10 @@ const Header = () => {
         <div className="nav-user" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {!isSplashPage && (
             <>
-              <FaUserCircle size={28} />
-              <span>Username</span>
+              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                <FaUserCircle size={28} />
+                <span>Username</span>
+              </Link>
               <FaSignOutAlt 
                 size={24} 
                 style={{ marginLeft: '0.5rem', cursor: 'pointer', color: '#e74c3c' }} 
