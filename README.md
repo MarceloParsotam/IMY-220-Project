@@ -1,7 +1,7 @@
 # IMY-220-Project
 
 <p align="center">
-  <img src="assets/NewLogo.png" alt="Logo" width="400"/>
+  <img src="public/assets/NewLogo.png" alt="Logo" width="400"/>
 </p>
 
 ---
