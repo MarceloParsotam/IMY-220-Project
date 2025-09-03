@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Friends from './pages/Friends';
+import Profile from './pages/Profile';
 
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="projects/:projectId" element={<ProjectDetail/>} />
         <Route path="/friends" element={<Friends/>} />
-        <Route path="/contact" element={<div>Contact Page</div>} />
+        <Route path="/profile" element={<Profile/>} />
       </Routes>
     </Router>
   );
