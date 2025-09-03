@@ -16,21 +16,6 @@ const Splash = () => {
   };
 
   useEffect(() => {
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    
-    if (loginForm && registerForm) {
-      if (activeTab === 'login') {
-        loginForm.classList.add('active');
-        registerForm.classList.remove('active');
-      } else {
-        loginForm.classList.remove('active');
-        registerForm.classList.add('active');
-      }
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
     const featureCards = document.querySelectorAll('.feature-card');
     
     const observer = new IntersectionObserver((entries) => {
@@ -86,16 +71,14 @@ const Splash = () => {
       <div className="auth-container scale-in">
         <AuthTabs activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === 'login' ? (
-          <LoginForm 
-            switchToRegister={() => setActiveTab('register')} 
-            isActive={activeTab === 'login'}
-          />
-        ) : (
-          <RegisterForm 
-            switchToLogin={() => setActiveTab('login')} 
-            isActive={activeTab === 'register'}
-          />
-        )}
+  <LoginForm 
+    switchToRegister={() => setActiveTab('register')} 
+  />
+) : (
+  <RegisterForm 
+    switchToLogin={() => setActiveTab('login')} 
+  />
+)}
       </div>
         
         <ScrollDown onClick={scrollToFeatures} />

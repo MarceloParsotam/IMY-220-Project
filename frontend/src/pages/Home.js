@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import ActivityFeed from '../components/ActivityFeed';
 import TrendingProjects from '../components/TrendingProjects';
 import PossibleConnections from '../components/PossibleConnections';
-
+import '../styles/global.css';
 const Home = () => {
   return (
     <div className="home-container">

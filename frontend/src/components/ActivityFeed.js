@@ -4,6 +4,7 @@ import LocalActivityFeed from './LocalActivityFeed';
 
 const ActivityFeed = () => {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'local', 'global'
+  const [searchQuery, setSearchQuery] = useState('');
 
   const messages = [
     {
@@ -60,8 +61,21 @@ const ActivityFeed = () => {
     }
   ];
 
-  const globalMessages = messages.filter(msg => msg.type === 'global');
-  const localMessages = messages.filter(msg => msg.type === 'local');
+  // Filter messages based on search query
+  const filteredMessages = messages.filter(message => {
+    if (!searchQuery) return true;
+    
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      message.title.toLowerCase().includes(searchLower) ||
+      message.content.toLowerCase().includes(searchLower) ||
+      message.author.toLowerCase().includes(searchLower) ||
+      (message.project && message.project.toLowerCase().includes(searchLower))
+    );
+  });
+
+  const globalMessages = filteredMessages.filter(msg => msg.type === 'global');
+  const localMessages = filteredMessages.filter(msg => msg.type === 'local');
 
   const renderContent = () => {
     switch (activeFilter) {
@@ -84,30 +98,51 @@ const ActivityFeed = () => {
     <div className="activity-feed">
       <div className="feed-header">
         <h2 className="feed-title">Activity Feed</h2>
-        <div className="feed-filter">
-          <button 
-            className={activeFilter === 'all' ? 'filter-btn active' : 'filter-btn'}
-            onClick={() => setActiveFilter('all')}
-          >
-            All
-          </button>
-          <button 
-            className={activeFilter === 'local' ? 'filter-btn active' : 'filter-btn'}
-            onClick={() => setActiveFilter('local')}
-          >
-            Local
-          </button>
-          <button 
-            className={activeFilter === 'global' ? 'filter-btn active' : 'filter-btn'}
-            onClick={() => setActiveFilter('global')}
-          >
-            Global
-          </button>
+        <div className="feed-controls">
+          <div className="feed-search">
+            <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <div className="feed-filter">
+            <button 
+              className={activeFilter === 'all' ? 'filter-btn active' : 'filter-btn'}
+              onClick={() => setActiveFilter('all')}
+            >
+              All
+            </button>
+            <button 
+              className={activeFilter === 'local' ? 'filter-btn active' : 'filter-btn'}
+              onClick={() => setActiveFilter('local')}
+            >
+              Local
+            </button>
+            <button 
+              className={activeFilter === 'global' ? 'filter-btn active' : 'filter-btn'}
+              onClick={() => setActiveFilter('global')}
+            >
+              Global
+            </button>
+          </div>
         </div>
       </div>
       
       <div className="messages-container">
-        {renderContent()}
+        {filteredMessages.length === 0 ? (
+          <div className="empty-state">
+            {searchQuery ? `No messages found for "${searchQuery}"` : 'No messages available'}
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
     </div>
   );

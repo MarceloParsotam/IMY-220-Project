@@ -2,14 +2,17 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 
-const Header = () => {
+const Header = ({ isAuthenticated, user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isSplashPage = location.pathname === '/';
 
   const handleLogout = () => {
-    // Add any logout logic here (e.g., clearing auth state)
-    navigate('/');
+    // Clear auth data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Redirect to splash page and reload to reset state
+    window.location.href = '/';
   };
 
   return (
@@ -19,16 +22,22 @@ const Header = () => {
           <img src="/assets/logo.png" alt="View Doc Logo" style={{ height: '40px' }} />
           {isSplashPage ? <span>View Doc</span> : <Link to="/home">View Doc</Link>}
         </div>
-        <ul className="nav-menu">
-          {!isSplashPage && <li><Link to="/home">Home</Link></li>}
-          {!isSplashPage && <li><Link to="/projects">Projects</Link></li>}
-          {!isSplashPage && <li><Link to="/friends">Friends</Link></li>}
-        </ul>
+        
+        {isAuthenticated && (
+          <ul className="nav-menu">
+            <li><Link to="/home">Home</Link></li>
+            <li><Link to="/projects">Projects</Link></li>
+            <li><Link to="/friends">Friends</Link></li>
+          </ul>
+        )}
+        
         <div className="nav-user" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {!isSplashPage && (
+          {isAuthenticated && user && (
             <>
-              <FaUserCircle size={28} />
-              <span>Username</span>
+              <Link to={`/profile/${user.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                <FaUserCircle size={28} />
+                <span>{user.name || user.username}</span>
+              </Link>
               <FaSignOutAlt 
                 size={24} 
                 style={{ marginLeft: '0.5rem', cursor: 'pointer', color: '#e74c3c' }} 
