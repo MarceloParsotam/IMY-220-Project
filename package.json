@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"scripts": {
 		"build": "webpack && babel backend/src/server.js -d dist",
-		"start": "nodemon --exec \"npm run build && node dist/server.js\" --watch backend/src",
+		"start": "node dist/server.js",
+		"dev": "nodemon --exec \"npm run build && node dist/server.js\" --watch backend/src",
 		"watch": "webpack -w"
 	},
 	"dependencies": {

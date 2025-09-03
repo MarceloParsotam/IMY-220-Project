@@ -11,6 +11,7 @@ const Friends = () => {
   // Sample data
   const friends = [
     {
+      id: 1,
       avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
       name: 'Sarah Johnson',
       title: 'Frontend Developer',
@@ -18,6 +19,7 @@ const Friends = () => {
       followers: 1200
     },
     {
+      id: 2,
       avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
       name: 'Michael Chen',
       title: 'Data Scientist',
@@ -25,6 +27,7 @@ const Friends = () => {
       followers: 856
     },
     {
+      id: 3,
       avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
       name: 'Emma Rodriguez',
       title: 'Full Stack Dev',
@@ -32,6 +35,7 @@ const Friends = () => {
       followers: 2300
     },
     {
+      id: 4,
       avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
       name: 'Robert Taylor',
       title: 'DevOps Engineer',
@@ -39,6 +43,7 @@ const Friends = () => {
       followers: 1100
     },
     {
+      id: 5,
       avatar: 'https://randomuser.me/api/portraits/women/28.jpg',
       name: 'Lisa Park',
       title: 'UI/UX Designer',
@@ -46,6 +51,7 @@ const Friends = () => {
       followers: 1500
     },
     {
+      id: 6,
       avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
       name: 'David Wilson',
       title: 'Backend Developer',
@@ -69,6 +75,7 @@ const Friends = () => {
 
   const suggestions = [
     {
+      id: 101,
       avatar: 'https://randomuser.me/api/portraits/women/72.jpg',
       name: 'Olivia Brown',
       title: 'JavaScript Developer',
@@ -76,6 +83,7 @@ const Friends = () => {
       followers: 723
     },
     {
+      id: 102,
       avatar: 'https://randomuser.me/api/portraits/men/93.jpg',
       name: 'James Wilson',
       title: 'Cloud Architect',
@@ -83,6 +91,7 @@ const Friends = () => {
       followers: 1400
     },
     {
+      id: 103,
       avatar: 'https://randomuser.me/api/portraits/women/85.jpg',
       name: 'Sophia Garcia',
       title: 'Mobile Developer',
