@@ -52,7 +52,7 @@ const Projects = () => {
       description: 'A full-stack task management application with real-time updates using Socket.io.',
       tags: ['ReactNative', 'NodeJS', 'SocketIO'],
       image: 'https://via.placeholder.com/600x400/ff006e/ffffff?text=Task+Manager',
-      checkedOutBy: null
+      checkedOut极: null
     },
     { 
       id: 4, 
@@ -103,10 +103,10 @@ const Projects = () => {
         {/* Sidebar */}
         <aside className="sidebar-left">
           <div className="sidebar-section">
-            <h3 className="sidebar-title">My Projects</h3>
-            <ul className="sidebar-list">
+            <h3 className="section-title">My Projects</h3>
+            <ul className="projects-list">
               {categories.map(category => (
-                <li key={category.name}>
+                <li key={category.name} className="project-item">
                   <a 
                     href="#" 
                     className={activeCategory === category.name ? 'active' : ''}
@@ -114,20 +114,21 @@ const Projects = () => {
                       e.preventDefault();
                       setActiveCategory(category.name);
                     }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}
                   >
                     {category.icon === 'folder' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2z"></path>
                       </svg>
                     )}
                     {category.icon === 'user' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4极2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
                     )}
                     {category.icon === 'users' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -142,25 +143,25 @@ const Projects = () => {
           </div>
           
           <div className="sidebar-section">
-            <h3 className="sidebar-title">Filters</h3>
-            <ul className="sidebar-list">
+            <h3 className="section-title">Filters</h3>
+            <ul className="projects-list">
               {filters.map(filter => (
-                <li key={filter.name}>
-                  <a href="#">
+                <li key={filter.name} className="project-item">
+                  <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
                     {filter.icon === 'star' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 极 2"></polygon>
                       </svg>
                     )}
                     {filter.icon === 'globe' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                       </svg>
                     )}
                     {filter.icon === 'smartphone' && (
-                      <svg className="sidebar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
                         <line x1="12" y1="18" x2="12" y2="18"></line>
                       </svg>
@@ -208,20 +209,20 @@ const Projects = () => {
         {/* Right Sidebar */}
         <aside className="sidebar-right">
           <div className="sidebar-section">
-            <h3 className="sidebar-title">Quick Actions</h3>
-            <ul className="sidebar-list">
-              <li>Create New Project</li>
-              <li>Import Project</li>
-              <li>Export Projects</li>
+            <h3 className="section-title">Quick Actions</h3>
+            <ul className="projects-list">
+              <li className="project-item">Create New Project</li>
+              <li className="project-item">Import Project</li>
+              <li className="project-item">Export Projects</li>
             </ul>
           </div>
           
           <div className="sidebar-section">
-            <h3 className="sidebar-title">Recent Activity</h3>
-            <ul className="sidebar-list">
-              <li>Project 2 checked out</li>
-              <li>Project 5 updated</li>
-              <li>New comment on Project 3</li>
+            <h3 className="section-title">Recent Activity</h3>
+            <ul className="projects-list">
+              <li className="project-item">Project 2 checked out</li>
+              <li className="project-item">Project 5 updated</li>
+              <li className="project-item">New comment on Project 3</li>
             </ul>
           </div>
         </aside>

@@ -27,7 +27,7 @@ const ProjectAbout = ({ project }) => {
 
         <div className="detail-column">
           <h3 className="detail-subtitle">Project Stats</h3>
-          <div className="stats-grid">
+          <div className="stats-grid-table">
             <div className="stat-item">
               <span className="stat-value">{project.downloads}</span>
               <span className="stat-label">Downloads</span>
