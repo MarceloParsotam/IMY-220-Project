@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileAbout from '../components/profile/ProfileAbout';
 import ProfileSkills from '../components/profile/ProfileSkills';
 import ProfileProjects from '../components/profile/ProfileProjects';
 import ProfileActivity from '../components/profile/ProfileActivity';
+import ProfileFriends from '../components/profile/ProfileFriends';
+import EditProfile from '../components/profile/EditProfile';
+import CreateProject from '../components/profile/CreateProject';
 
 const Profile = () => {
-  // Sample user data
-const user = {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [user, setUser] = useState({
     name: 'Name Surname',
     avatars: [
       'https://randomuser.me/api/portraits/men/1.jpg',
@@ -53,17 +57,70 @@ const user = {
         title: 'Random Event 3',
         description: 'Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa.'
       }
+    ],
+    friends: [
+      {
+        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+        name: 'Sarah Johnson',
+        title: 'Frontend Developer'
+      },
+      {
+        avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+        name: 'Michael Chen',
+        title: 'Data Scientist'
+      },
+      {
+        avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+        name: 'Emma Rodriguez',
+        title: 'Full Stack Dev'
+      }
     ]
+  });
+
+  const handleSaveProfile = (updatedData) => {
+    setUser({
+      ...user,
+      ...updatedData,
+      contact: {
+        phone: updatedData.phone,
+        email: updatedData.email
+      }
+    });
+    setIsEditing(false);
+  };
+
+  const handleCreateProject = (projectData) => {
+    const newProject = {
+      initials: projectData.name.substring(0, 2).toUpperCase(),
+      title: projectData.name,
+      description: projectData.description
+    };
+    
+    setUser({
+      ...user,
+      projects: [...user.projects, newProject]
+    });
+    setIsCreatingProject(false);
   };
 
   return (
     <div className="profile-container">
       <ProfileHeader user={user} />
       
+      <div className="profile-actions">
+        <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+          Edit Profile
+        </button>
+        <button className="create-project-btn" onClick={() => setIsCreatingProject(true)}>
+          Create Project
+        </button>
+      </div>
+      
       <div className="profile-content">
         <div className="profile-main">
           <ProfileAbout about={user.about} contact={user.contact} />
           <ProfileSkills skills={user.skills} languages={user.languages} />
+          <ProfileFriends friends={user.friends} />
         </div>
         
         <div className="profile-sidebar">
@@ -71,9 +128,23 @@ const user = {
           <ProfileActivity activities={user.activities} />
         </div>
       </div>
+
+      {isEditing && (
+        <EditProfile
+          user={user}
+          onSave={handleSaveProfile}
+          onCancel={() => setIsEditing(false)}
+        />
+      )}
+
+      {isCreatingProject && (
+        <CreateProject
+          onSave={handleCreateProject}
+          onCancel={() => setIsCreatingProject(false)}
+        />
+      )}
     </div>
   );
 };
-
 
 export default Profile;
