@@ -38,3 +38,10 @@ In the root of the project (where the `Dockerfile` is located), run:
 
 ```bash
 docker build -t imy220-project .
+```
+### 3. Running Docker Image
+In the same location as where you built the project, run:
+
+```bash
+docker run -p 3000:3000 imy220-project
+```
