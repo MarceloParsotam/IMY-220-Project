@@ -12,65 +12,113 @@ const Projects = () => {
   const [activeCategory, setActiveCategory] = useState('All Projects');
 
   // Sample project data
-  const projects = [
-    { 
-      id: 1, 
-      name: 'React Dashboard', 
-      type: 'Web Application',
-      isCheckedOut: false, 
-      isFavorite: false, 
-      lastUpdated: '2 hours ago',
-      version: 'v1.2.5',
-      created: '15 Jan 2023',
-      description: 'A customizable admin dashboard built with React and Material UI. Features data visualization and user management.',
-      tags: ['React', 'TypeScript', 'MaterialUI'],
-      image: 'https://via.placeholder.com/600x400/3a86ff/ffffff?text=React+Dashboard',
-      checkedOutBy: null
-    },
-    { 
-      id: 2, 
-      name: 'E-commerce API', 
-      type: 'Backend Service',
-      isCheckedOut: true, 
-      isFavorite: true, 
-      lastUpdated: '5 hours ago',
-      version: 'v2.0.1',
-      created: '5 Mar 2023',
-      description: 'RESTful API for e-commerce applications built with Node.js, Express, and MongoDB.',
-      tags: ['NodeJS', 'Express', 'MongoDB'],
-      image: 'https://via.placeholder.com/600x400/8338ec/ffffff?text=E-commerce+API',
-      checkedOutBy: 'You'
-    },
-    { 
-      id: 3, 
-      name: 'Task Manager', 
-      type: 'Mobile Application',
-      isCheckedOut: false, 
-      isFavorite: true, 
-      lastUpdated: '1 day ago',
-      version: 'v0.9.3',
-      created: '22 Feb 2023',
-      description: 'A full-stack task management application with real-time updates using Socket.io.',
-      tags: ['ReactNative', 'NodeJS', 'SocketIO'],
-      image: 'https://via.placeholder.com/600x400/ff006e/ffffff?text=Task+Manager',
-      checkedOut极: null
-    },
-    { 
-      id: 4, 
-      name: 'DevOps Handbook', 
-      type: 'Documentation',
-      isCheckedOut: true, 
-      isFavorite: false, 
-      lastUpdated: '2 days ago',
-      version: 'v1.5.2',
-      created: '10 Jan 2023',
-      description: 'Comprehensive guide to DevOps practices with examples and implementation guides.',
-      tags: ['DevOps', 'Docker', 'AWS'],
-      image: 'https://via.placeholder.com/600x400/1a1a2e/ffffff?text=DevOps+Handbook',
-      checkedOutBy: 'Sarah'
-    }
-  ];
-
+// In your Projects.js component, update the project data to include status flags:
+const projects = [
+  { 
+    id: 1, 
+    name: 'React Dashboard', 
+    type: 'Web Application',
+    isCheckedOut: false, 
+    isFavorite: false, 
+    lastUpdated: '2 hours ago',
+    version: 'v1.2.5',
+    created: '15 Jan 2023',
+    description: 'A customizable admin dashboard built with React and Material UI. Features data visualization and user management.',
+    tags: ['React', 'TypeScript', 'MaterialUI'],
+    checkedOutBy: null
+  },
+  { 
+    id: 2, 
+    name: 'E-commerce API', 
+    type: 'Backend Service',
+    isCheckedOut: true, 
+    isFavorite: true, 
+    lastUpdated: '5 hours ago',
+    version: 'v2.0.1',
+    created: '5 Mar 2023',
+    description: 'RESTful API for e-commerce applications built with Node.js, Express, and MongoDB.',
+    tags: ['NodeJS', 'Express', 'MongoDB'],
+    checkedOutBy: 'You'
+  },
+  { 
+    id: 3, 
+    name: 'Task Manager', 
+    type: 'Mobile Application',
+    isCheckedOut: false, 
+    isFavorite: true, 
+    lastUpdated: '1 day ago',
+    version: 'v0.9.3',
+    created: '22 Feb 2023',
+    description: 'A full-stack task management application with real-time updates using Socket.io.',
+    tags: ['ReactNative', 'NodeJS', 'SocketIO'],
+    checkedOutBy: null
+  },
+  { 
+    id: 4, 
+    name: 'DevOps Handbook', 
+    type: 'Documentation',
+    isCheckedOut: true, 
+    isFavorite: false, 
+    lastUpdated: '2 days ago',
+    version: 'v1.5.2',
+    created: '10 Jan 2023',
+    description: 'Comprehensive guide to DevOps practices with examples and implementation guides.',
+    tags: ['DevOps', 'Docker', 'AWS'],
+    checkedOutBy: 'Sarah'
+  },
+  { 
+    id: 5, 
+    name: 'UI Component Library', 
+    type: 'Library',
+    isCheckedOut: false, 
+    isFavorite: true, 
+    lastUpdated: '3 days ago',
+    version: 'v3.1.0',
+    created: '8 Apr 2023',
+    description: 'A comprehensive set of reusable UI components for React applications.',
+    tags: ['React', 'Storybook', 'CSS'],
+    checkedOutBy: null
+  },
+  { 
+    id: 6, 
+    name: 'Data Analytics Platform', 
+    type: 'Web Application',
+    isCheckedOut: true, 
+    isFavorite: false, 
+    lastUpdated: '1 week ago',
+    version: 'v2.3.4',
+    created: '20 Mar 2023',
+    description: 'Platform for analyzing and visualizing large datasets with interactive dashboards.',
+    tags: ['Python', 'Django', 'PostgreSQL'],
+    checkedOutBy: 'John'
+  },
+  { 
+    id: 7, 
+    name: 'Mobile Game', 
+    type: 'Mobile Application',
+    isCheckedOut: false, 
+    isFavorite: true, 
+    lastUpdated: '1 week ago',
+    version: 'v1.0.0',
+    created: '12 May 2023',
+    description: 'A casual mobile game built with Unity for iOS and Android platforms.',
+    tags: ['Unity', 'C#', 'Mobile'],
+    checkedOutBy: null
+  },
+  { 
+    id: 8, 
+    name: 'API Gateway', 
+    type: 'Backend Service',
+    isCheckedOut: false, 
+    isFavorite: false, 
+    lastUpdated: '2 weeks ago',
+    version: 'v1.7.0',
+    created: '3 Feb 2023',
+    description: 'Microservices API gateway with authentication, rate limiting, and logging.',
+    tags: ['Go', 'Kubernetes', 'Redis'],
+    checkedOutBy: null
+  }
+];
   const tabs = [
     { name: 'All', count: 4 },
     { name: 'Checked In', count: 5 },
