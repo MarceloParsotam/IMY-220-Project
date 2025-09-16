@@ -74,7 +74,7 @@ app.post('/api/auth/register', (req, res) => {
     success: true,
     message: 'User registered successfully',
     user: userWithoutPassword,
-    token: 'stubbed-jwt-token-' + Date.now() // Mock JWT token
+    token: 'stubbed-jwt-token-' + Date.now()
   });
 });
 
@@ -117,7 +117,7 @@ app.post('/api/auth/login', (req, res) => {
     success: true,
     message: 'Login successful',
     user: userWithoutPassword,
-    token: 'stubbed-jwt-token-' + Date.now() // Mock JWT token
+    token: 'stubbed-jwt-token-' + Date.now() 
   });
 });
 
