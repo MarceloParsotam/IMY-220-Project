@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginForm = ({ switchToRegister, isActive }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const LoginForm = ({ switchToRegister, isActive }) => {
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -46,10 +48,9 @@ const LoginForm = ({ switchToRegister, isActive }) => {
       console.log('Login response data:', data);
 
       if (data.success) {
-        // Store token and user data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        console.log('Login successful, stored data in localStorage');
+        // Use AuthContext to handle login
+        login(data.user, data.token);
+        console.log('Login successful, auth context updated');
         
         // Force a hard navigation to ensure the app reloads with auth state
         window.location.href = '/home';
@@ -66,7 +67,7 @@ const LoginForm = ({ switchToRegister, isActive }) => {
 
   return (
     <form 
-      className="auth-form" // Removed the conditional className since we're using conditional rendering
+      className="auth-form"
       id="login-form" 
       onSubmit={handleSubmit}
     >
