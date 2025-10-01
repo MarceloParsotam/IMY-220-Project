@@ -11,6 +11,9 @@ const ProfileActivity = ({ activities }) => {
             <p className="activity-description">{activity.description}</p>
           </div>
         ))}
+        {activities.length === 0 && (
+          <p className="no-activity">No recent activity</p>
+        )}
       </div>
     </div>
   );

@@ -20,6 +20,9 @@ const ProfileFriends = ({ friends }) => {
             </div>
           </div>
         ))}
+        {friends.length === 0 && (
+          <p className="no-friends">No friends yet</p>
+        )}
       </div>
     </div>
   );

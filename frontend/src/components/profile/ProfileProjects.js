@@ -14,6 +14,9 @@ const ProfileProjects = ({ projects }) => {
             <p className="project-description">{project.description}</p>
           </div>
         ))}
+        {projects.length === 0 && (
+          <p className="no-projects">No projects yet</p>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
 const EditProfile = ({ user, onSave, onCancel }) => {
+  // Extract first and last name from the full name
+  const nameParts = user.name ? user.name.split(' ') : ['', ''];
+  
   const [formData, setFormData] = useState({
-    name: user.name,
-    description: user.description,
-    location: user.location,
-    about: user.about,
-    phone: user.contact.phone,
-    email: user.contact.email,
-    skills: user.skills.join(', '),
-    languages: user.languages.join(', ')
+    name: nameParts[0] || '',
+    surname: nameParts.slice(1).join(' ') || '',
+    description: user.description || '',
+    about: user.about || '',
+    skills: user.skills?.join(', ') || ''
   });
 
   const handleChange = (e) => {
@@ -23,8 +23,7 @@ const EditProfile = ({ user, onSave, onCancel }) => {
     e.preventDefault();
     onSave({
       ...formData,
-      skills: formData.skills.split(',').map(skill => skill.trim()),
-      languages: formData.languages.split(',').map(lang => lang.trim())
+      skills: formData.skills.split(',').map(skill => skill.trim()).filter(skill => skill)
     });
   };
 
@@ -37,20 +36,35 @@ const EditProfile = ({ user, onSave, onCancel }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="edit-form">
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="form-input"
-            />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name">First Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Enter first name"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="surname">Last Name</label>
+              <input
+                type="text"
+                id="surname"
+                name="surname"
+                value={formData.surname}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Enter last name"
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">Bio</label>
             <textarea
               id="description"
               name="description"
@@ -58,18 +72,7 @@ const EditProfile = ({ user, onSave, onCancel }) => {
               onChange={handleChange}
               className="form-textarea"
               rows="3"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="location">Location</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="form-input"
+              placeholder="A short description about yourself"
             />
           </div>
 
@@ -82,33 +85,8 @@ const EditProfile = ({ user, onSave, onCancel }) => {
               onChange={handleChange}
               className="form-textarea"
               rows="4"
+              placeholder="Tell us more about yourself..."
             />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="phone">Phone</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="form-input"
-              />
-            </div>
           </div>
 
           <div className="form-group">
@@ -120,18 +98,7 @@ const EditProfile = ({ user, onSave, onCancel }) => {
               value={formData.skills}
               onChange={handleChange}
               className="form-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="languages">Languages (comma-separated)</label>
-            <input
-              type="text"
-              id="languages"
-              name="languages"
-              value={formData.languages}
-              onChange={handleChange}
-              className="form-input"
+              placeholder="JavaScript, React, Node.js, MongoDB"
             />
           </div>
 
