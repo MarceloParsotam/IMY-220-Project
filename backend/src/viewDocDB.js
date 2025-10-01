@@ -21,7 +21,7 @@ async function connectToDatabase() {
         
         // Test connection by listing collections
         const collections = await db.listCollections().toArray();
-        console.log('📁 Collections:', collections.map(c => c.name));
+        console.log('Collections:', collections.map(c => c.name));
         
         return db;
     } catch (error) {
@@ -47,7 +47,7 @@ async function closeConnection() {
         await client.close();
         db = null;
         client = null;
-        console.log('📴 Database connection closed');
+        console.log('Database connection closed');
     }
 }
 
