@@ -1,8 +1,8 @@
 # Use official Node.js runtime as base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
-WORKDIR /u22491717-Pos7-Project
+WORKDIR /u22491717-Pos7-Project-D2
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
