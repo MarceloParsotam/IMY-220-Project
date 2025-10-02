@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 
-const CreateProjectModal = ({ isOpen, onClose }) => {
+const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+  const [formData, setFormData] = useState({
+    projectName: '',
+    projectDescription: '',
+    projectType: ''
+  });
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -22,6 +27,33 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const projectData = {
+      ...formData,
+      tags: tags
+    };
+
+    onCreateProject(projectData);
+    
+    // Reset form
+    setFormData({
+      projectName: '',
+      projectDescription: '',
+      projectType: ''
+    });
+    setTags([]);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -32,25 +64,45 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
-          <form id="projectForm">
+          <form id="projectForm" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="projectName" className="form-label">Project Name</label>
-              <input type="text" id="projectName" className="form-control" required />
+              <input 
+                type="text" 
+                id="projectName" 
+                className="form-control" 
+                value={formData.projectName}
+                onChange={handleInputChange}
+                required 
+              />
             </div>
             
             <div className="form-group">
               <label htmlFor="projectDescription" className="form-label">Description</label>
-              <textarea id="projectDescription" className="form-control form-textarea" required></textarea>
+              <textarea 
+                id="projectDescription" 
+                className="form-control form-textarea" 
+                value={formData.projectDescription}
+                onChange={handleInputChange}
+                required
+              ></textarea>
             </div>
             
             <div className="form-group">
               <label htmlFor="projectType" className="form-label">Project Type</label>
-              <select id="projectType" className="form-control" required>
+              <select 
+                id="projectType" 
+                className="form-control" 
+                value={formData.projectType}
+                onChange={handleInputChange}
+                required
+              >
                 <option value="">Select a type</option>
-                <option value="web">Web Application</option>
-                <option value="mobile">Mobile Application</option>
-                <option value="backend">Backend Service</option>
-                <option value="documentation">Documentation</option>
+                <option value="Web Application">Web Application</option>
+                <option value="Mobile Application">Mobile Application</option>
+                <option value="Backend Service">Backend Service</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Library">Library</option>
               </select>
             </div>
             
