@@ -12,6 +12,7 @@ const Friends = () => {
   const [requests, setRequests] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const { currentUser } = useAuth();
 
   // Get token from localStorage
@@ -20,8 +21,16 @@ const Friends = () => {
     return userData?._id || userData?.id || '';
   };
 
+  // Filter friends and suggestions based on search query
+  const filteredFriends = friends.filter(friend =>
+    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredSuggestions = suggestions.filter(suggestion =>
+    suggestion.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Fetch all friends data
-  // Inside fetchFriendsData function in Friends.js
   const fetchFriendsData = async () => {
     if (!currentUser) return;
 
@@ -108,6 +117,10 @@ const Friends = () => {
   useEffect(() => {
     fetchFriendsData();
   }, [currentUser]);
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
 
   const handleConnect = async (suggestionId) => {
     try {
@@ -240,26 +253,34 @@ const Friends = () => {
 
   return (
     <div className="friends-container">
-      <FriendsHeader />
-      <FriendsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <FriendsHeader onSearch={handleSearch} />
       
       {/* Friends Grid */}
       <div className="section-header">
-        <h2 className="section-title">My Connections ({friends.length})</h2>
+        <h2 className="section-title">
+          My Connections ({filteredFriends.length})
+          {searchQuery && ` - Search: "${searchQuery}"`}
+        </h2>
       </div>
       
       <div className="friends-grid">
-        {friends.map((friend, index) => (
+        {filteredFriends.map((friend, index) => (
           <FriendCard 
             key={friend.id || index} 
             friend={friend} 
             onRemove={() => handleRemoveFriend(friend.id, friend)}
           />
         ))}
-        {friends.length === 0 && (
+        {filteredFriends.length === 0 && (
           <div className="no-friends-message">
-            <p>You haven't added any connections yet.</p>
-            <p>Check out the suggestions below to get started!</p>
+            {searchQuery ? (
+              <p>No friends found for "{searchQuery}"</p>
+            ) : (
+              <>
+                <p>You haven't added any connections yet.</p>
+                <p>Check out the suggestions below to get started!</p>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -285,9 +306,10 @@ const Friends = () => {
       
       {/* Suggestions Section */}
       <SuggestionsSection 
-        suggestions={suggestions} 
+        suggestions={filteredSuggestions} 
         onRefresh={handleRefreshSuggestions}
         onConnect={handleConnect}
+        searchQuery={searchQuery}
       />
     </div>
   );
