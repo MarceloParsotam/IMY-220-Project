@@ -3722,3 +3722,88 @@ button {
   font-size: 12px;
   text-align: center;
 }
+.discussion-input-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.discussion-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.discussion-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.discussion-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.discussion-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-discussion-btn {
+  padding: 0.5rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.submit-discussion-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.submit-discussion-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.no-discussions {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.discussion-item {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.discussion-item:last-child {
+  border-bottom: none;
+}
+
+.discussion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.discussion-time {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.discussion-content {
+  margin: 0;
+  line-height: 1.5;
+}

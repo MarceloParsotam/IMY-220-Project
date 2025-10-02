@@ -11,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 const ProjectDetail = () => {
   const { projectId } = useParams(); // CHANGED: from 'id' to 'projectId'
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('files'); // CHANGED: 'files' as default
   const [isEditing, setIsEditing] = useState(false);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -269,6 +269,8 @@ const ProjectDetail = () => {
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
           project={project} 
+          currentUser={currentUser}
+          onRefreshProject={() => fetchProjectData(projectId)}
         />
       </div>
 

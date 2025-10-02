@@ -8,12 +8,6 @@ const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
     <>
       <div className="project-tabs">
         <button 
-          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button 
           className={`tab-button ${activeTab === 'files' ? 'active' : ''}`}
           onClick={() => setActiveTab('files')}
         >
