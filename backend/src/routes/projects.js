@@ -4,6 +4,76 @@ const { ObjectId } = require('mongodb');
 const viewDocDB = require('../viewDocDB');
 const { authenticateUser } = require('../middleware/auth');
 
+// GET /api/projects/all - Get all public projects and user's projects
+router.get('/all', authenticateUser, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const projectsCollection = viewDocDB.getCollection('projects');
+        const checkoutsCollection = viewDocDB.getCollection('checkouts');
+
+        // Get all public projects AND user's own projects (even if private)
+        const projects = await projectsCollection.find({ 
+            $or: [
+                { isPublic: true }, // All public projects
+                { userId: new ObjectId(userId) }, // User's own projects (even private)
+                { 'collaborators.userId': new ObjectId(userId) } // Projects user collaborates on
+            ]
+        })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+        // Get current checkout status for each project
+        const projectsWithCheckoutStatus = await Promise.all(
+            projects.map(async (project) => {
+                const activeCheckout = await checkoutsCollection.findOne({
+                    projectId: project._id,
+                    returnedAt: null
+                });
+
+                return {
+                    id: project._id.toString(),
+                    _id: project._id,
+                    name: project.name,
+                    title: project.name,
+                    description: project.description,
+                    type: project.type || 'Web Application',
+                    tags: project.tags || [],
+                    isPublic: project.isPublic !== undefined ? project.isPublic : true,
+                    createdAt: project.createdAt,
+                    updatedAt: project.updatedAt,
+                    status: project.status || 'active',
+                    userId: project.userId,
+                    // Checkout information
+                    isCheckedOut: !!activeCheckout,
+                    currentCheckout: activeCheckout ? {
+                        userId: activeCheckout.userId,
+                        userName: activeCheckout.userName,
+                        checkedOutAt: activeCheckout.checkedOutAt,
+                        expectedReturn: activeCheckout.expectedReturn
+                    } : null,
+                    // Frontend fields
+                    isFavorite: project.isFavorite || false,
+                    lastUpdated: formatTimeAgo(project.updatedAt || project.createdAt),
+                    version: project.version || 'v1.0.0',
+                    created: formatDate(project.createdAt),
+                    // Ownership info for frontend
+                    isOwnedByUser: project.userId.toString() === userId.toString(),
+                    isCollaborator: project.collaborators && project.collaborators.some(collab => 
+                        collab.userId.toString() === userId.toString()
+                    )
+                };
+            })
+        );
+
+        res.json(projectsWithCheckoutStatus);
+    } catch (error) {
+        console.error('Error fetching all projects:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch projects'
+        });
+    }
+});
 // POST /api/projects - Create new project
 router.post('/', authenticateUser, async (req, res) => {
     try {

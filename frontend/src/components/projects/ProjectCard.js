@@ -146,6 +146,10 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
                    currentCheckout.userId === (currentUser?._id || currentUser?.id);
 
   const isOwnedByUser = project.userId === (currentUser?._id || currentUser?.id);
+  const isCollaborator = project.isCollaborator || false;
+  
+  // User can interact with project if they own it, are a collaborator, or it's public
+  const canInteract = isOwnedByUser || isCollaborator || project.isPublic;
 
   return (
     <>
@@ -154,6 +158,11 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
           <div className="project-title-section">
             <h3 className="project-title">{project.name}</h3>
             <div className="project-type">{project.type}</div>
+            {!isOwnedByUser && (
+              <div className="project-owner">
+                <small>By {project.currentCheckout?.userName || 'Another User'}</small>
+              </div>
+            )}
           </div>
           <div className="project-status-container">
             <div className={`project-status ${isCheckedOut ? 'status-checked-out' : 'status-checked-in'}`}>
@@ -190,29 +199,41 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
         </div>
         
         <div className="project-actions">
-          {isCheckedOut ? (
-            <button 
-              className={`project-btn ${canCheckIn ? 'primary-btn' : 'secondary-btn'}`} 
-              onClick={canCheckIn ? handleCheckin : undefined}
-              disabled={loading || !canCheckIn}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 19V5M5 12l7-7 7 7"></path>
-              </svg>
-              {loading ? 'Processing...' : (canCheckIn ? 'Check In' : 'Checked Out')}
-            </button>
+          {canInteract ? (
+            <>
+              {isCheckedOut ? (
+                <button 
+                  className={`project-btn ${canCheckIn ? 'primary-btn' : 'secondary-btn'}`} 
+                  onClick={canCheckIn ? handleCheckin : undefined}
+                  disabled={loading || !canCheckIn}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7"></path>
+                  </svg>
+                  {loading ? 'Processing...' : (canCheckIn ? 'Check In' : 'Checked Out')}
+                </button>
+              ) : (
+                <button 
+                  className="project-btn primary-btn" 
+                  onClick={handleCheckout}
+                  disabled={loading}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4.2v10.3"></path>
+                  </svg>
+                  {loading ? 'Processing...' : 'Check Out'}
+                </button>
+              )}
+            </>
           ) : (
-            <button 
-              className="project-btn primary-btn" 
-              onClick={handleCheckout}
-              disabled={loading}
-            >
+            <button className="project-btn secondary-btn" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 4.2v10.3"></path>
               </svg>
-              {loading ? 'Processing...' : 'Check Out'}
+              Private Project
             </button>
           )}
+          
           <Link to={`/projects/${project.id}`} className="project-btn secondary-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -220,6 +241,7 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
             </svg>
             View
           </Link>
+          
           {isOwnedByUser && (
             <>
               <button className="project-btn secondary-btn" onClick={handleEdit}>

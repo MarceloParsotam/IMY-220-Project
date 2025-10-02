@@ -20,7 +20,38 @@ const Projects = () => {
     const userData = JSON.parse(localStorage.getItem('user'));
     return userData?._id || userData?.id || '';
   };
+  // Fetch all projects (user's projects + public projects)
+const fetchAllProjects = async () => {
+  if (!currentUser) return;
 
+  try {
+    setLoading(true);
+    const token = getToken();
+
+    const response = await fetch(`http://localhost:3000/api/projects/all`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const projectsData = await response.json();
+      setProjects(projectsData);
+      setFilteredProjects(projectsData);
+    } else {
+      console.error('Failed to fetch projects');
+    }
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchAllProjects(); // Changed from fetchUserProjects
+}, [currentUser]);
   // Fetch user's projects from API
   const fetchUserProjects = async () => {
     if (!currentUser) return;
@@ -56,47 +87,48 @@ const Projects = () => {
   }, [currentUser]);
 
   // Filter projects based on active category, tab, search, and type
-  useEffect(() => {
-    let filtered = projects;
+  // Filter projects based on active category, tab, search, and type
+useEffect(() => {
+  let filtered = projects;
 
-    // Filter by category (All Projects, Owned Projects, Shared Projects)
-    if (activeCategory === 'Owned Projects') {
-      filtered = filtered.filter(project => 
-        project.userId === (currentUser?._id || currentUser?.id)
-      );
-    } else if (activeCategory === 'Shared Projects') {
-      filtered = filtered.filter(project => 
-        project.userId !== (currentUser?._id || currentUser?.id)
-      );
-    }
-    // 'All Projects' shows everything
+  // Filter by category (All Projects, Owned Projects, Shared Projects)
+  if (activeCategory === 'Owned Projects') {
+    filtered = filtered.filter(project => 
+      project.userId === (currentUser?._id || currentUser?.id)
+    );
+  } else if (activeCategory === 'Shared Projects') {
+    filtered = filtered.filter(project => 
+      project.userId !== (currentUser?._id || currentUser?.id) && project.isPublic
+    );
+  }
+  // 'All Projects' shows everything
 
-    // Filter by tab (All, Checked In, Checked Out, Favorites)
-    if (activeTab === 'Checked In') {
-      filtered = filtered.filter(project => !project.isCheckedOut);
-    } else if (activeTab === 'Checked Out') {
-      filtered = filtered.filter(project => project.isCheckedOut);
-    } else if (activeTab === 'Favorites') {
-      filtered = filtered.filter(project => project.isFavorite);
-    }
-    // 'All' tab shows everything
+  // ... rest of your filtering logic remains the same
+  // Filter by tab (All, Checked In, Checked Out, Favorites)
+  if (activeTab === 'Checked In') {
+    filtered = filtered.filter(project => !project.isCheckedOut);
+  } else if (activeTab === 'Checked Out') {
+    filtered = filtered.filter(project => project.isCheckedOut);
+  } else if (activeTab === 'Favorites') {
+    filtered = filtered.filter(project => project.isFavorite);
+  }
 
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(project =>
-        project.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
+  // Filter by search query
+  if (searchQuery) {
+    filtered = filtered.filter(project =>
+      project.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }
 
-    // Filter by project type
-    if (filterType !== 'All Types') {
-      filtered = filtered.filter(project => project.type === filterType);
-    }
+  // Filter by project type
+  if (filterType !== 'All Types') {
+    filtered = filtered.filter(project => project.type === filterType);
+  }
 
-    setFilteredProjects(filtered);
-  }, [projects, activeCategory, activeTab, searchQuery, filterType, currentUser]);
+  setFilteredProjects(filtered);
+}, [projects, activeCategory, activeTab, searchQuery, filterType, currentUser]);
 
   // Handle project creation
   const handleCreateProject = async (projectData) => {
