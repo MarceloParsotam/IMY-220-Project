@@ -1,3 +1,4 @@
+// EditProject.js - UPDATED
 import React, { useState, useEffect } from 'react';
 
 const EditProject = ({ project, onSave, onCancel }) => {
@@ -6,7 +7,9 @@ const EditProject = ({ project, onSave, onCancel }) => {
     description: '',
     version: '',
     technologies: '',
-    members: ''
+    members: '',
+    type: '',
+    tags: ''
   });
 
   // Initialize form data when project changes
@@ -16,7 +19,9 @@ const EditProject = ({ project, onSave, onCancel }) => {
       description: project.description || '',
       version: project.version || '',
       technologies: project.technologies?.join(', ') || '',
-      members: project.members?.join(', ') || ''
+      members: project.members?.join(', ') || '',
+      type: project.type || 'Web Application',
+      tags: project.tags?.join(', ') || ''
     });
   }, [project]);
 
@@ -29,11 +34,19 @@ const EditProject = ({ project, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({
-      ...formData,
+    
+    // Prepare the data to send to backend
+    const updatedData = {
+      name: formData.name,
+      description: formData.description,
+      version: formData.version,
+      type: formData.type,
       technologies: formData.technologies.split(',').map(tech => tech.trim()).filter(tech => tech),
-      members: formData.members.split(',').map(member => member.trim()).filter(member => member)
-    });
+      members: formData.members.split(',').map(member => member.trim()).filter(member => member),
+      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+    };
+    
+    onSave(updatedData);
   };
 
   // Close modal when clicking outside
@@ -42,6 +55,16 @@ const EditProject = ({ project, onSave, onCancel }) => {
       onCancel();
     }
   };
+
+  const projectTypes = [
+    'Web Application',
+    'Mobile Application', 
+    'Backend Service',
+    'Documentation',
+    'Library',
+    'API',
+    'Desktop Application'
+  ];
 
   return (
     <div className="edit-project-modal" onClick={handleOverlayClick}>
@@ -79,6 +102,21 @@ const EditProject = ({ project, onSave, onCancel }) => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="projectType">Project Type</label>
+            <select
+              id="projectType"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="form-select"
+            >
+              {projectTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="projectVersion">Version</label>
             <input
               type="text"
@@ -101,6 +139,19 @@ const EditProject = ({ project, onSave, onCancel }) => {
               onChange={handleChange}
               className="form-input"
               placeholder="React, Node.js, MongoDB"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="projectTags">Tags (comma-separated)</label>
+            <input
+              type="text"
+              id="projectTags"
+              name="tags"
+              value={formData.tags}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="web, mobile, api"
             />
           </div>
 

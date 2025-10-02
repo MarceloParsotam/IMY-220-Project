@@ -512,66 +512,69 @@ router.get('/user-checkouts/:userId', authenticateUser, async (req, res) => {
     }
 });
 
-// PUT /api/projects/:projectId - Update a project
+// In projects.js - UPDATE the PUT /api/projects/:projectId route
 router.put('/:projectId', authenticateUser, async (req, res) => {
-    try {
-        const { projectId } = req.params;
-        const { name, description, type, tags } = req.body;
-        const userId = req.user._id;
+  try {
+    const { projectId } = req.params;
+    const { name, description, type, tags, version, technologies, members } = req.body;
+    const userId = req.user._id;
 
-        const projectsCollection = viewDocDB.getCollection('projects');
+    const projectsCollection = viewDocDB.getCollection('projects');
 
-        // Check if project exists and user owns it
-        const project = await projectsCollection.findOne({
-            _id: new ObjectId(projectId),
-            userId: new ObjectId(userId)
-        });
+    // Check if project exists and user owns it
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId),
+      userId: new ObjectId(userId)
+    });
 
-        if (!project) {
-            return res.status(404).json({
-                success: false,
-                message: 'Project not found or you do not have permission to edit it'
-            });
-        }
-
-        // Update project
-        const updateData = {
-            name,
-            description,
-            type,
-            tags: tags || [],
-            updatedAt: new Date()
-        };
-
-        await projectsCollection.updateOne(
-            { _id: new ObjectId(projectId) },
-            { $set: updateData }
-        );
-
-        // Create activity
-        const activitiesCollection = viewDocDB.getCollection('activities');
-        await activitiesCollection.insertOne({
-            userId: new ObjectId(userId),
-            type: 'project_updated',
-            title: 'Project Updated',
-            description: `Updated project: ${name}`,
-            date: new Date(),
-            projectId: new ObjectId(projectId)
-        });
-
-        res.json({
-            success: true,
-            message: 'Project updated successfully',
-            project: { ...project, ...updateData }
-        });
-
-    } catch (error) {
-        console.error('Error updating project:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to update project'
-        });
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found or you do not have permission to edit it'
+      });
     }
+
+    // Update project with all fields
+    const updateData = {
+      name,
+      description,
+      type: type || 'Web Application',
+      tags: tags || [],
+      version: version || 'v1.0.0',
+      technologies: technologies || [],
+      members: members || [],
+      updatedAt: new Date()
+    };
+
+    await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { $set: updateData }
+    );
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'project_updated',
+      title: 'Project Updated',
+      description: `Updated project: ${name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId)
+    });
+
+    res.json({
+      success: true,
+      message: 'Project updated successfully',
+      project: { ...project, ...updateData }
+    });
+
+  } catch (error) {
+    console.error('Error updating project:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update project'
+    });
+  }
 });
 
 // DELETE /api/projects/:projectId - Delete a project
@@ -811,8 +814,8 @@ router.get('/favorites/:userId', authenticateUser, async (req, res) => {
         });
     }
 });
-// GET /api/projects/:id - Get specific project by ID
-// In projects.js - UPDATE the existing GET /api/projects/:id route
+
+// In projects.js - UPDATE the GET /api/projects/:id route to include all fields
 router.get('/:id', authenticateUser, async (req, res) => {
   try {
     const projectId = req.params.id;
@@ -854,8 +857,11 @@ router.get('/:id', authenticateUser, async (req, res) => {
       _id: project._id,
       name: project.name,
       description: project.description,
-      type: project.type,
+      type: project.type || 'Web Application',
       tags: project.tags || [],
+      version: project.version || 'v1.0.0',
+      technologies: project.technologies || project.tags || ['React', 'Node.js', 'MongoDB'],
+      members: project.members || (user ? [user.username] : ['Project Owner']),
       isPublic: project.isPublic !== undefined ? project.isPublic : true,
       userId: project.userId,
       createdAt: project.createdAt,
@@ -871,16 +877,9 @@ router.get('/:id', authenticateUser, async (req, res) => {
       views: project.views || Math.floor(Math.random() * 1000) + 100,
       languages: project.languages || project.tags || ['JavaScript', 'React'],
       
-      // Members data
-      members: project.members || (user ? [user.username] : ['Project Owner']),
-      
-      // Technologies
-      technologies: project.technologies || project.tags || ['React', 'Node.js', 'MongoDB'],
-      
       // Stats
       downloads: project.downloads || Math.floor(Math.random() * 500) + 50,
       stars: project.stars || Math.floor(Math.random() * 200) + 10,
-      version: project.version || 'v1.0.0',
       
       // Messages and discussions
       messages: project.messages || [],
