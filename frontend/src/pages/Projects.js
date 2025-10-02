@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProjectFilters from '../components/projects/ProjectFilters';
 import ProjectGrid from '../components/projects/ProjectGrid';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Projects = () => {
   const [activeTab, setActiveTab] = useState('All');
@@ -10,128 +10,263 @@ const Projects = () => {
   const [filterType, setFilterType] = useState('All Types');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All Projects');
+  const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
-  // Sample project data
-// In your Projects.js component, update the project data to include status flags:
-const projects = [
-  { 
-    id: 1, 
-    name: 'React Dashboard', 
-    type: 'Web Application',
-    isCheckedOut: false, 
-    isFavorite: false, 
-    lastUpdated: '2 hours ago',
-    version: 'v1.2.5',
-    created: '15 Jan 2023',
-    description: 'A customizable admin dashboard built with React and Material UI. Features data visualization and user management.',
-    tags: ['React', 'TypeScript', 'MaterialUI'],
-    checkedOutBy: null
-  },
-  { 
-    id: 2, 
-    name: 'E-commerce API', 
-    type: 'Backend Service',
-    isCheckedOut: true, 
-    isFavorite: true, 
-    lastUpdated: '5 hours ago',
-    version: 'v2.0.1',
-    created: '5 Mar 2023',
-    description: 'RESTful API for e-commerce applications built with Node.js, Express, and MongoDB.',
-    tags: ['NodeJS', 'Express', 'MongoDB'],
-    checkedOutBy: 'You'
-  },
-  { 
-    id: 3, 
-    name: 'Task Manager', 
-    type: 'Mobile Application',
-    isCheckedOut: false, 
-    isFavorite: true, 
-    lastUpdated: '1 day ago',
-    version: 'v0.9.3',
-    created: '22 Feb 2023',
-    description: 'A full-stack task management application with real-time updates using Socket.io.',
-    tags: ['ReactNative', 'NodeJS', 'SocketIO'],
-    checkedOutBy: null
-  },
-  { 
-    id: 4, 
-    name: 'DevOps Handbook', 
-    type: 'Documentation',
-    isCheckedOut: true, 
-    isFavorite: false, 
-    lastUpdated: '2 days ago',
-    version: 'v1.5.2',
-    created: '10 Jan 2023',
-    description: 'Comprehensive guide to DevOps practices with examples and implementation guides.',
-    tags: ['DevOps', 'Docker', 'AWS'],
-    checkedOutBy: 'Sarah'
-  },
-  { 
-    id: 5, 
-    name: 'UI Component Library', 
-    type: 'Library',
-    isCheckedOut: false, 
-    isFavorite: true, 
-    lastUpdated: '3 days ago',
-    version: 'v3.1.0',
-    created: '8 Apr 2023',
-    description: 'A comprehensive set of reusable UI components for React applications.',
-    tags: ['React', 'Storybook', 'CSS'],
-    checkedOutBy: null
-  },
-  { 
-    id: 6, 
-    name: 'Data Analytics Platform', 
-    type: 'Web Application',
-    isCheckedOut: true, 
-    isFavorite: false, 
-    lastUpdated: '1 week ago',
-    version: 'v2.3.4',
-    created: '20 Mar 2023',
-    description: 'Platform for analyzing and visualizing large datasets with interactive dashboards.',
-    tags: ['Python', 'Django', 'PostgreSQL'],
-    checkedOutBy: 'John'
-  },
-  { 
-    id: 7, 
-    name: 'Mobile Game', 
-    type: 'Mobile Application',
-    isCheckedOut: false, 
-    isFavorite: true, 
-    lastUpdated: '1 week ago',
-    version: 'v1.0.0',
-    created: '12 May 2023',
-    description: 'A casual mobile game built with Unity for iOS and Android platforms.',
-    tags: ['Unity', 'C#', 'Mobile'],
-    checkedOutBy: null
-  },
-  { 
-    id: 8, 
-    name: 'API Gateway', 
-    type: 'Backend Service',
-    isCheckedOut: false, 
-    isFavorite: false, 
-    lastUpdated: '2 weeks ago',
-    version: 'v1.7.0',
-    created: '3 Feb 2023',
-    description: 'Microservices API gateway with authentication, rate limiting, and logging.',
-    tags: ['Go', 'Kubernetes', 'Redis'],
-    checkedOutBy: null
+  // Get token from localStorage
+  const getToken = () => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    return userData?._id || userData?.id || '';
+  };
+  // Fetch all projects (user's projects + public projects)
+const fetchAllProjects = async () => {
+  if (!currentUser) return;
+
+  try {
+    setLoading(true);
+    const token = getToken();
+
+    const response = await fetch(`http://localhost:3000/api/projects/all`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const projectsData = await response.json();
+      setProjects(projectsData);
+      setFilteredProjects(projectsData);
+    } else {
+      console.error('Failed to fetch projects');
+    }
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+  } finally {
+    setLoading(false);
   }
-];
-  const tabs = [
-    { name: 'All', count: 4 },
-    { name: 'Checked In', count: 5 },
-    { name: 'Checked Out', count: 3 },
-    { name: 'Favorites', count: 2 }
-  ];
+};
 
+useEffect(() => {
+  fetchAllProjects(); // Changed from fetchUserProjects
+}, [currentUser]);
+  // Fetch user's projects from API
+  const fetchUserProjects = async () => {
+    if (!currentUser) return;
+
+    try {
+      setLoading(true);
+      const token = getToken();
+      const userId = currentUser._id || currentUser.id;
+
+      const response = await fetch(`http://localhost:3000/api/projects/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const projectsData = await response.json();
+        setProjects(projectsData);
+        setFilteredProjects(projectsData); // Initialize filtered projects
+      } else {
+        console.error('Failed to fetch projects');
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProjects();
+  }, [currentUser]);
+
+  // Filter projects based on active category, tab, search, and type
+  // Filter projects based on active category, tab, search, and type
+useEffect(() => {
+  let filtered = projects;
+
+  // Filter by category (All Projects, Owned Projects, Shared Projects)
+  if (activeCategory === 'Owned Projects') {
+    filtered = filtered.filter(project => 
+      project.userId === (currentUser?._id || currentUser?.id)
+    );
+  } else if (activeCategory === 'Shared Projects') {
+    filtered = filtered.filter(project => 
+      project.userId !== (currentUser?._id || currentUser?.id) && project.isPublic
+    );
+  }
+  // 'All Projects' shows everything
+
+  // ... rest of your filtering logic remains the same
+  // Filter by tab (All, Checked In, Checked Out, Favorites)
+  if (activeTab === 'Checked In') {
+    filtered = filtered.filter(project => !project.isCheckedOut);
+  } else if (activeTab === 'Checked Out') {
+    filtered = filtered.filter(project => project.isCheckedOut);
+  } else if (activeTab === 'Favorites') {
+    filtered = filtered.filter(project => project.isFavorite);
+  }
+
+  // Filter by search query
+  if (searchQuery) {
+    filtered = filtered.filter(project =>
+      project.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }
+
+  // Filter by project type
+  if (filterType !== 'All Types') {
+    filtered = filtered.filter(project => project.type === filterType);
+  }
+
+  setFilteredProjects(filtered);
+}, [projects, activeCategory, activeTab, searchQuery, filterType, currentUser]);
+
+  // Handle project creation
+  const handleCreateProject = async (projectData) => {
+    try {
+      const token = getToken();
+      const userId = currentUser._id || currentUser.id;
+
+      const response = await fetch('http://localhost:3000/api/projects', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: projectData.projectName,
+          description: projectData.projectDescription,
+          type: projectData.projectType,
+          tags: projectData.tags || [],
+          isPublic: true
+        })
+      });
+
+      if (response.ok) {
+        await fetchUserProjects(); // Refresh the projects list
+        setIsModalOpen(false);
+        alert('Project created successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to create project');
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      alert('Failed to create project');
+    }
+  };
+
+  // Handle checkout updates
+  const handleCheckoutUpdate = (projectId, isCheckedOut, checkoutData) => {
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.id === projectId 
+          ? { 
+              ...project, 
+              isCheckedOut, 
+              currentCheckout: checkoutData 
+            } 
+          : project
+      )
+    );
+  };
+
+  // Handle project deletion
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) {
+      return;
+    }
+
+    try {
+      const token = getToken();
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        await fetchUserProjects(); // Refresh the projects list
+        alert('Project deleted successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to delete project');
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project');
+    }
+  };
+
+  // Handle project editing
+  const handleEditProject = async (projectId, updatedData) => {
+    try {
+      const token = getToken();
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        await fetchUserProjects(); // Refresh the projects list
+        alert('Project updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to update project');
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+      alert('Failed to update project');
+    }
+  };
+
+  const handleFavoriteUpdate = (projectId, isFavorite) => {
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.id === projectId 
+          ? { ...project, isFavorite } 
+          : project
+      )
+    );
+  };
+  // Calculate counts for tabs
+  const getTabCounts = () => {
+    const allCount = projects.length;
+    const checkedInCount = projects.filter(p => !p.isCheckedOut).length;
+    const checkedOutCount = projects.filter(p => p.isCheckedOut).length;
+    const favoritesCount = projects.filter(p => p.isFavorite).length;
+
+    return [
+      { name: 'All', count: allCount },
+      { name: 'Checked In', count: checkedInCount },
+      { name: 'Checked Out', count: checkedOutCount },
+      { name: 'Favorites', count: favoritesCount }
+    ];
+  };
+
+  const tabs = getTabCounts();
   const filterTypes = [
     'All Types',
     'Web Application',
     'Mobile Application',
     'Backend Service',
-    'Documentation'
+    'Documentation',
+    'Library'
   ];
 
   const categories = [
@@ -146,10 +281,18 @@ const projects = [
     { name: 'Mobile Apps', icon: 'smartphone' }
   ];
 
+  if (loading) {
+    return (
+      <div className="home-container">
+        <div className="loading">Loading projects...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="home-container">
       <div className="home-layout">
-        {/* Sidebar */}
+        {/* Left Sidebar - Categories and Filters */}
         <aside className="sidebar-left">
           <div className="sidebar-section">
             <h3 className="section-title">My Projects</h3>
@@ -172,7 +315,7 @@ const projects = [
                     )}
                     {category.icon === 'user' && (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4极2"></path>
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
                     )}
@@ -196,10 +339,26 @@ const projects = [
             <ul className="projects-list">
               {filters.map(filter => (
                 <li key={filter.name} className="project-item">
-                  <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Implement filter logic here
+                      if (filter.name === 'Recently Updated') {
+                        setFilteredProjects(prev => 
+                          [...prev].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                        );
+                      } else if (filter.name === 'Web Applications') {
+                        setFilterType('Web Application');
+                      } else if (filter.name === 'Mobile Apps') {
+                        setFilterType('Mobile Application');
+                      }
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}
+                  >
                     {filter.icon === 'star' && (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 极 2"></polygon>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
                     )}
                     {filter.icon === 'globe' && (
@@ -223,10 +382,10 @@ const projects = [
           </div>
         </aside>
         
-        {/* Projects Content */}
+        {/* Main Content */}
         <main className="main-content">
           <div className="feed-header">
-            <h2 className="feed-title">My Projects</h2>
+            <h2 className="feed-title">My Projects ({filteredProjects.length})</h2>
             <button className="connect-btn" onClick={() => setIsModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -248,10 +407,14 @@ const projects = [
           />
           
           <ProjectGrid 
-            projects={projects}
+            projects={filteredProjects}
             activeTab={activeTab}
             searchQuery={searchQuery}
             filterType={filterType}
+            onCheckoutUpdate={handleCheckoutUpdate}
+            onDeleteProject={handleDeleteProject}
+            onEditProject={handleEditProject}
+            onFavoriteUpdate={handleFavoriteUpdate}
           />
         </main>
         
@@ -260,27 +423,38 @@ const projects = [
           <div className="sidebar-section">
             <h3 className="section-title">Quick Actions</h3>
             <ul className="projects-list">
-              <li className="project-item">Create New Project</li>
-              <li className="project-item">Import Project</li>
-              <li className="project-item">Export Projects</li>
+              <li className="project-item" onClick={() => setIsModalOpen(true)}>
+                Create New Project
+              </li>
+              <li className="project-item">
+                Import Project
+              </li>
+              <li className="project-item">
+                Export Projects
+              </li>
             </ul>
           </div>
           
           <div className="sidebar-section">
             <h3 className="section-title">Recent Activity</h3>
             <ul className="projects-list">
-              <li className="project-item">Project 2 checked out</li>
-              <li className="project-item">Project 5 updated</li>
-              <li className="project-item">New comment on Project 3</li>
+              {projects.slice(0, 3).map(project => (
+                <li key={project.id} className="project-item">
+                  {project.name} - {project.isCheckedOut ? 'Checked Out' : 'Updated'}
+                </li>
+              ))}
+              {projects.length === 0 && (
+                <li className="project-item">No recent activity</li>
+              )}
             </ul>
           </div>
         </aside>
       </div>
 
-      {/* Create Project Modal */}
       <CreateProjectModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onCreateProject={handleCreateProject}
       />
     </div>
   );

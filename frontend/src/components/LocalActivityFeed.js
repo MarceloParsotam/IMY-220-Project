@@ -29,18 +29,6 @@ const LocalActivityFeed = ({ messages }) => {
               <strong>Project:</strong> {message.project}
             </div>
           )}
-          
-          <div className="message-actions">
-            <button className="message-action-btn">
-              <span className="action-icon">👍</span> {message.likes}
-            </button>
-            <button className="message-action-btn">
-              <span className="action-icon">💬</span> {message.comments}
-            </button>
-            <button className="message-action-btn">
-              <span className="action-icon">🔗</span> Share
-            </button>
-          </div>
         </div>
       ))}
     </div>

@@ -1,22 +1,21 @@
 import React from 'react';
 import ProjectCard from './ProjectCard';
 
-const ProjectGrid = ({ projects, activeTab, searchQuery, filterType }) => {
+const ProjectGrid = ({ 
+  projects, 
+  activeTab, 
+  searchQuery, 
+  filterType, 
+  onCheckoutUpdate, 
+  onDeleteProject, 
+  onEditProject,
+  onFavoriteUpdate 
+}) => {
   const filteredProjects = projects.filter(project => {
     // Filter by search query
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    // Filter by active tab
-    let matchesTab = true;
-    if (activeTab === 'Checked Out') {
-      matchesTab = project.isCheckedOut;
-    } else if (activeTab === 'Favorites') {
-      matchesTab = project.isFavorite;
-    } else if (activeTab === 'Checked In') {
-      matchesTab = !project.isCheckedOut;
-    }
+                         (project.tags && project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
     
     // Filter by type
     let matchesType = true;
@@ -24,7 +23,7 @@ const ProjectGrid = ({ projects, activeTab, searchQuery, filterType }) => {
       matchesType = project.type === filterType;
     }
     
-    return matchesSearch && matchesTab && matchesType;
+    return matchesSearch && matchesType;
   });
 
   if (filteredProjects.length === 0) {
@@ -38,7 +37,14 @@ const ProjectGrid = ({ projects, activeTab, searchQuery, filterType }) => {
   return (
     <div className="projects-grid">
       {filteredProjects.map(project => (
-        <ProjectCard key={project.id} project={project} />
+        <ProjectCard 
+          key={project.id} 
+          project={project} 
+          onCheckoutUpdate={onCheckoutUpdate}
+          onDeleteProject={onDeleteProject}
+          onEditProject={onEditProject}
+          onFavoriteUpdate={onFavoriteUpdate}
+        />
       ))}
     </div>
   );

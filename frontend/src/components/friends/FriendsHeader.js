@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const FriendsHeader = () => {
+const FriendsHeader = ({ onSearch }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
+
   return (
     <div className="friends-header">
       <h1 className="friends-title">My Connections</h1>
@@ -9,7 +19,12 @@ const FriendsHeader = () => {
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" placeholder="Search connections..." />
+        <input 
+          type="text" 
+          placeholder="Search connections..." 
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
       </div>
     </div>
   );

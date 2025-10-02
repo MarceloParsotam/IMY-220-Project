@@ -1,6 +1,12 @@
 import React from 'react';
 import FriendCard from './FriendCard';
-const SuggestionsSection = ({ suggestions, onRefresh }) => {
+
+const SuggestionsSection = ({ suggestions, onRefresh, onConnect, searchQuery = '' }) => {
+  // Filter suggestions based on search query (by name)
+  const filteredSuggestions = suggestions.filter(suggestion =>
+    suggestion.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="suggestions-section">
       <div className="section-header">
@@ -15,9 +21,26 @@ const SuggestionsSection = ({ suggestions, onRefresh }) => {
         </button>
       </div>
       <div className="friends-grid">
-        {suggestions.map((suggestion, index) => (
-          <FriendCard key={index} friend={suggestion} isSuggestion={true} />
+        {filteredSuggestions.map((suggestion, index) => (
+          <FriendCard 
+            key={suggestion.id || index} 
+            friend={suggestion} 
+            isSuggestion={true}
+            onConnect={onConnect}
+          />
         ))}
+        {filteredSuggestions.length === 0 && (
+          <div className="no-suggestions-message">
+            {searchQuery ? (
+              <p>No suggestions found for "{searchQuery}"</p>
+            ) : (
+              <>
+                <p>No suggestions available at the moment.</p>
+                <p>Try refreshing or add more skills to your profile!</p>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

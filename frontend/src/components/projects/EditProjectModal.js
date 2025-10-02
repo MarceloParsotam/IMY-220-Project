@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
 
-const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
-  const [tags, setTags] = useState([]);
-  const [tagInput, setTagInput] = useState('');
+const EditProjectModal = ({ project, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    projectName: '',
-    projectDescription: '',
-    projectType: ''
+    name: project.name || '',
+    description: project.description || '',
+    type: project.type || 'Web Application',
+    tags: project.tags || []
   });
+  const [tagInput, setTagInput] = useState('');
 
   const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim()]
+      }));
       setTagInput('');
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
   const handleKeyPress = (e) => {
@@ -27,52 +33,28 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    const projectData = {
-      ...formData,
-      tags: tags
-    };
-
-    onCreateProject(projectData);
-    
-    // Reset form
-    setFormData({
-      projectName: '',
-      projectDescription: '',
-      projectType: ''
-    });
-    setTags([]);
+    onSave(formData);
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Create New Project</h2>
+          <h2 className="modal-title">Edit Project</h2>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
-          <form id="projectForm" onSubmit={handleSubmit}>
+          <form id="editProjectForm" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="projectName" className="form-label">Project Name</label>
               <input 
                 type="text" 
                 id="projectName" 
                 className="form-control" 
-                value={formData.projectName}
-                onChange={handleInputChange}
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 required 
               />
             </div>
@@ -82,8 +64,8 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
               <textarea 
                 id="projectDescription" 
                 className="form-control form-textarea" 
-                value={formData.projectDescription}
-                onChange={handleInputChange}
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 required
               ></textarea>
             </div>
@@ -93,11 +75,10 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
               <select 
                 id="projectType" 
                 className="form-control" 
-                value={formData.projectType}
-                onChange={handleInputChange}
+                value={formData.type}
+                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                 required
               >
-                <option value="">Select a type</option>
                 <option value="Web Application">Web Application</option>
                 <option value="Mobile Application">Mobile Application</option>
                 <option value="Backend Service">Backend Service</option>
@@ -107,12 +88,12 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
             </div>
             
             <div className="form-group">
-              <label className="form-label">Programming Languages (Hashtags)</label>
+              <label className="form-label">Tags</label>
               <div className="tag-input">
                 <input 
                   type="text" 
                   className="tag-input-field" 
-                  placeholder="Add a programming language (e.g. JavaScript)"
+                  placeholder="Add a tag (e.g. JavaScript)"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -120,7 +101,7 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
                 <button type="button" className="tag-input-btn" onClick={addTag}>Add</button>
               </div>
               <div className="tags-container">
-                {tags.map(tag => (
+                {formData.tags.map(tag => (
                   <div key={tag} className="tag">
                     #{tag}
                     <button type="button" onClick={() => removeTag(tag)}>&times;</button>
@@ -132,11 +113,11 @@ const CreateProjectModal = ({ isOpen, onClose, onCreateProject }) => {
         </div>
         <div className="modal-footer">
           <button type="button" className="project-btn secondary-btn" onClick={onClose}>Cancel</button>
-          <button type="submit" form="projectForm" className="project-btn primary-btn">Create Project</button>
+          <button type="submit" form="editProjectForm" className="project-btn primary-btn">Save Changes</button>
         </div>
       </div>
     </div>
   );
 };
 
-export default CreateProjectModal;
+export default EditProjectModal;

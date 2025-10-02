@@ -1,67 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GlobalActivityFeed from './GlobalActivityFeed';
 import LocalActivityFeed from './LocalActivityFeed';
+import { useAuth } from '../contexts/AuthContext'; // Import your auth context
 
 const ActivityFeed = () => {
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'local', 'global'
+  const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser, isAuthenticated } = useAuth(); // Get currentUser from auth context
 
-  const messages = [
-    {
-      id: 1,
-      type: 'global',
-      title: 'Global Message 1',
-      content: 'Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa. Sit nulla nihil est aspernatur itaque hic consequuntur corrupti eos iusto iste.',
-      author: 'John Doe',
-      timestamp: '2 hours ago',
-      likes: 24,
-      comments: 5
-    },
-    {
-      id: 2,
-      type: 'local',
-      title: 'Local Message 1',
-      content: 'Just deployed my new React project! Check it out and let me know what you think. Built with modern hooks and context API.',
-      author: 'Sarah Johnson',
-      timestamp: '1 hour ago',
-      likes: 15,
-      comments: 3,
-      project: 'React Portfolio App'
-    },
-    {
-      id: 3,
-      type: 'global',
-      title: 'Global Message 2',
-      content: 'Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa. Sit nulla nihil est aspernatur itaque hic consequuntur corrupti eos iusto iste.',
-      author: 'Global Bot',
-      timestamp: '3 hours ago',
-      likes: 42,
-      comments: 12
-    },
-    {
-      id: 4,
-      type: 'local',
-      title: 'Need feedback on UI design',
-      content: 'Working on a new dashboard interface. Would appreciate some feedback on the color scheme and layout choices.',
-      author: 'Mike Chen',
-      timestamp: '45 minutes ago',
-      likes: 8,
-      comments: 7,
-      project: 'Admin Dashboard'
-    },
-    {
-      id: 5,
-      type: 'global',
-      title: 'Global Message 3',
-      content: 'Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa. Sit nulla nihil est aspernatur itaque hic consequuntur corrupti eos iusto iste.',
-      author: 'Community Manager',
-      timestamp: '5 hours ago',
-      likes: 37,
-      comments: 8
+  useEffect(() => {
+    fetchActivities();
+  }, [activeFilter, currentUser]); // Add currentUser as dependency
+
+  const fetchActivities = async () => {
+  try {
+    setLoading(true);
+    
+    // Check if we have the current user with valid ID
+    if (!currentUser || !currentUser._id) {
+      console.error('No current user or user ID found');
+      setMessages([]); // Empty array instead of mock data
+      return;
     }
-  ];
+    
+    const response = await fetch(`/api/activities?filter=${activeFilter}`, {
+      headers: {
+        'Authorization': `Bearer ${currentUser._id}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-  // Filter messages based on search query
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Activities fetched:', data.activities);
+      setMessages(data.activities || []);
+    } else {
+      const errorText = await response.text();
+      console.error('API Error:', response.status, errorText);
+      setMessages([]); // Empty array instead of mock data
+    }
+  } catch (error) {
+    console.error('Fetch Error:', error);
+    setMessages([]); // Empty array instead of mock data
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Rest of your component remains the same...
   const filteredMessages = messages.filter(message => {
     if (!searchQuery) return true;
     
@@ -78,6 +66,10 @@ const ActivityFeed = () => {
   const localMessages = filteredMessages.filter(msg => msg.type === 'local');
 
   const renderContent = () => {
+    if (loading) {
+      return <div className="loading">Loading activities...</div>;
+    }
+
     switch (activeFilter) {
       case 'local':
         return <LocalActivityFeed messages={localMessages} />;
@@ -106,7 +98,7 @@ const ActivityFeed = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search messages..."
+              placeholder="Search activities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -136,9 +128,9 @@ const ActivityFeed = () => {
       </div>
       
       <div className="messages-container">
-        {filteredMessages.length === 0 ? (
+        {!loading && filteredMessages.length === 0 ? (
           <div className="empty-state">
-            {searchQuery ? `No messages found for "${searchQuery}"` : 'No messages available'}
+            {searchQuery ? `No activities found for "${searchQuery}"` : 'No activities available'}
           </div>
         ) : (
           renderContent()

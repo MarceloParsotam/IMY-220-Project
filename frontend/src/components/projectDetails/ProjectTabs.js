@@ -1,18 +1,11 @@
 import React from 'react';
-import OverviewTab from './OverviewTab';
 import FilesTab from './FilesTab';
 import DiscussionTab from './DiscussionTab';
 
-const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
+const ProjectTabs = ({ activeTab, setActiveTab, project, currentUser, onRefreshProject }) => {
   return (
     <>
       <div className="project-tabs">
-        <button 
-          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
         <button 
           className={`tab-button ${activeTab === 'files' ? 'active' : ''}`}
           onClick={() => setActiveTab('files')}
@@ -28,9 +21,22 @@ const ProjectTabs = ({ activeTab, setActiveTab, project }) => {
       </div>
 
       <div className="tab-content">
-        {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'files' && <FilesTab files={project.files} />}
-        {activeTab === 'discussion' && <DiscussionTab discussions={project.discussions} />}
+        {activeTab === 'files' && (
+          <FilesTab 
+            files={project.files || []} 
+            currentUser={currentUser}  // Pass currentUser to FilesTab
+            projectId={project._id}
+            onRefreshProject={onRefreshProject}
+          />
+        )}
+        {activeTab === 'discussion' && (
+          <DiscussionTab 
+            discussions={project.discussions || []} 
+            currentUser={currentUser}  // Pass currentUser to DiscussionTab
+            projectId={project._id}
+            onRefreshProject={onRefreshProject}
+          />
+        )}
       </div>
     </>
   );

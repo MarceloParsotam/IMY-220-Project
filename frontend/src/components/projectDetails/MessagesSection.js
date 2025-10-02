@@ -1,8 +1,9 @@
+// MessagesSection.js - UPDATED
 import React, { useState } from 'react';
 
 const MessagesSection = ({ messages, checkoutMessages, onAddCheckinMessage, onAddCheckoutMessage }) => {
   const [activeMessageTab, setActiveMessageTab] = useState('checkin');
-
+  
   return (
     <section className="project-section">
       <div className="messages-header">
@@ -41,12 +42,20 @@ const MessagesSection = ({ messages, checkoutMessages, onAddCheckinMessage, onAd
 // Checkin Messages Component
 const CheckinMessages = ({ messages, onAddMessage }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      onAddMessage(newMessage, 'checkin');
+    if (!newMessage.trim()) return;
+    
+    setSubmitting(true);
+    try {
+      await onAddMessage(newMessage.trim(), 'checkin');
       setNewMessage('');
+    } catch (error) {
+      console.error('Error submitting message:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -60,10 +69,15 @@ const CheckinMessages = ({ messages, onAddMessage }) => {
             placeholder="Add a check-in message..."
             className="message-input"
             rows="3"
+            disabled={submitting}
           />
         </div>
-        <button type="submit" className="submit-btn">
-          Add Check-in Message
+        <button 
+          type="submit" 
+          className="submit-btn"
+          disabled={submitting || !newMessage.trim()}
+        >
+          {submitting ? 'Adding...' : 'Add Check-in Message'}
         </button>
       </form>
 
@@ -72,7 +86,9 @@ const CheckinMessages = ({ messages, onAddMessage }) => {
           <div key={index} className="message-item checkin-message">
             <div className="message-header">
               <span className="message-user">{msg.user}</span>
-              <span className="message-time">checked in {msg.time}</span>
+              <span className="message-time">
+                {msg.time ? `checked in ${formatTime(msg.time)}` : 'Recently'}
+              </span>
             </div>
             <p className="message-content">{msg.message}</p>
           </div>
@@ -91,12 +107,20 @@ const CheckinMessages = ({ messages, onAddMessage }) => {
 // Checkout Messages Component
 const CheckoutMessages = ({ messages, onAddMessage }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      onAddMessage(newMessage, 'checkout');
+    if (!newMessage.trim()) return;
+    
+    setSubmitting(true);
+    try {
+      await onAddMessage(newMessage.trim(), 'checkout');
       setNewMessage('');
+    } catch (error) {
+      console.error('Error submitting message:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -110,10 +134,15 @@ const CheckoutMessages = ({ messages, onAddMessage }) => {
             placeholder="Add a check-out message..."
             className="message-input"
             rows="3"
+            disabled={submitting}
           />
         </div>
-        <button type="submit" className="submit-btn">
-          Add Check-out Message
+        <button 
+          type="submit" 
+          className="submit-btn"
+          disabled={submitting || !newMessage.trim()}
+        >
+          {submitting ? 'Adding...' : 'Add Check-out Message'}
         </button>
       </form>
 
@@ -122,7 +151,9 @@ const CheckoutMessages = ({ messages, onAddMessage }) => {
           <div key={index} className="message-item checkout-message">
             <div className="message-header">
               <span className="message-user">{msg.user}</span>
-              <span className="message-time">checked out {msg.time}</span>
+              <span className="message-time">
+                {msg.time ? `checked out ${formatTime(msg.time)}` : 'Recently'}
+              </span>
             </div>
             <p className="message-content">{msg.message}</p>
           </div>
@@ -136,6 +167,26 @@ const CheckoutMessages = ({ messages, onAddMessage }) => {
       </div>
     </div>
   );
+};
+
+// Helper function to format time
+const formatTime = (timeString) => {
+  try {
+    const time = new Date(timeString);
+    const now = new Date();
+    const diffMs = now - time;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return time.toLocaleDateString();
+  } catch (error) {
+    return 'Recently';
+  }
 };
 
 export default MessagesSection;

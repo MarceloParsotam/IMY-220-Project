@@ -1,18 +1,17 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext'; // Import AuthContext
 
-const Header = ({ isAuthenticated, user }) => {
+const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated, logout } = useAuth(); // Use AuthContext
   const isSplashPage = location.pathname === '/';
 
   const handleLogout = () => {
-    // Clear auth data
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    // Redirect to splash page and reload to reset state
-    window.location.href = '/';
+    logout(); // Use AuthContext logout function
+    navigate('/'); // Navigate to splash page
   };
 
   return (
@@ -32,11 +31,20 @@ const Header = ({ isAuthenticated, user }) => {
         )}
         
         <div className="nav-user" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {isAuthenticated && user && (
+          {isAuthenticated && currentUser && (
             <>
-              <Link to={`/profile/${user.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'inherit' }}>
+              <Link 
+                to={`/profile/${currentUser._id || currentUser.id}`} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  textDecoration: 'none', 
+                  color: 'inherit' 
+                }}
+              >
                 <FaUserCircle size={28} />
-                <span>{user.name || user.username}</span>
+                <span>{currentUser.username}</span> {/* Use username instead of name */}
               </Link>
               <FaSignOutAlt 
                 size={24} 

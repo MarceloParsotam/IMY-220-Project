@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterForm = ({ switchToLogin, isActive }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
   const [fieldErrors, setFieldErrors] = useState({});
   
   const navigate = useNavigate();
+  const { register } = useAuth(); // Changed from login to register
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -95,9 +97,9 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
       const data = await response.json();
 
       if (data.success) {
-        // Store token and user data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // FIX: Use register function instead of login, and remove token parameter
+        register(data.user); // Remove the second parameter
+        console.log('Registration successful, auth context updated');
         
         window.location.href = '/home';
       } else {
@@ -124,7 +126,7 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
 
   return (
     <form 
-      className="auth-form" // Removed conditional className
+      className="auth-form"
       id="register-form" 
       onSubmit={handleSubmit}
     >
@@ -236,12 +238,6 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
       </p>
     </form>
   );
-};
-
-// Add default props
-RegisterForm.defaultProps = {
-  isActive: true,
-  switchToLogin: () => console.log('Switch to login clicked')
 };
 
 export default RegisterForm;
