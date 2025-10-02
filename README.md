@@ -55,27 +55,18 @@ https://github.com/MarceloParsotam/IMY-220-Project/tree/master
 ## Docker Commands
 
 ### Build the Docker Image
+```bash
 docker build -t viewdoc-app .
-
+```
 ### Run the Docker Container
+```bash
 docker run -p 3000:3000 viewdoc-app
-
+```
 ### View Running Containers
 docker ps
 
-### View Container Logs
-docker logs <container-id>
-
-### Stop Container
-docker stop <container-id>
-
-### Remove Container
-docker rm <container-id>
-
-### Remove Image
-docker rmi viewdoc-app
-
 ## Dockerfile Content
+```bash
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
@@ -84,6 +75,7 @@ COPY . .
 RUN npm run build
 EXPOSE 3000
 CMD ["npm", "start"]
+```
 
 ## Project Structure
 - /frontend - React application
@@ -93,13 +85,16 @@ CMD ["npm", "start"]
 
 ## MongoDB Atlas Connection
 If using MongoDB Atlas, update your connection string in the environment variables:
+```bash
 MONGODB_URI = "mongodb+srv://test-user:test-password@imy220.44tnuyp.mongodb.net/ViewDocDB?retryWrites=true&w=majority&appName=IMY220";
-
+```
 ## Application Access
 After starting the container, access the application at:
+```bash
 http://localhost:3000
+```
 
 ## Development Commands
-npm run dev - Start development server
-npm run build - Build for production
-npm start - Start production server
+```npm run dev``` - Start development server
+```npm run build``` - Build for production
+```npm start``` - Start production server
