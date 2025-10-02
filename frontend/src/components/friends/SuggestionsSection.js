@@ -1,6 +1,7 @@
 import React from 'react';
 import FriendCard from './FriendCard';
-const SuggestionsSection = ({ suggestions, onRefresh }) => {
+
+const SuggestionsSection = ({ suggestions, onRefresh, onConnect }) => {
   return (
     <div className="suggestions-section">
       <div className="section-header">
@@ -16,8 +17,19 @@ const SuggestionsSection = ({ suggestions, onRefresh }) => {
       </div>
       <div className="friends-grid">
         {suggestions.map((suggestion, index) => (
-          <FriendCard key={index} friend={suggestion} isSuggestion={true} />
+          <FriendCard 
+            key={suggestion.id || index} 
+            friend={suggestion} 
+            isSuggestion={true}
+            onConnect={onConnect}
+          />
         ))}
+        {suggestions.length === 0 && (
+          <div className="no-suggestions-message">
+            <p>No suggestions available at the moment.</p>
+            <p>Try refreshing or add more skills to your profile!</p>
+          </div>
+        )}
       </div>
     </div>
   );

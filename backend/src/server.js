@@ -727,6 +727,341 @@ app.post('/api/checkins', authenticateUser, async (req, res) => {
     }
 });
 
+// FRIENDS ENDPOINTS
+
+// GET /api/friends/:userId - Get user's friends
+app.get('/api/friends/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Find user and populate friends
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { friends: 1 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get friend details
+    const friends = await usersCollection.find({
+      _id: { $in: user.friends || [] }
+    })
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, projects: 1 })
+    .toArray();
+
+    // Transform friends data
+    const transformedFriends = friends.map(friend => ({
+      id: friend._id,
+      name: `${friend.name} ${friend.surname}`,
+      username: friend.username,
+      avatar: (friend.avatar && friend.avatar.data) ? 
+        `http://localhost:3000/api/users/${friend._id}/avatar` : 
+        '/default-avatar.png',
+      title: friend.bio || 'Developer',
+      skills: friend.skills || [],
+      projects: friend.projects ? friend.projects.length : 0,
+      followers: Math.floor(Math.random() * 2000) + 100 // Mock data for now
+    }));
+
+    res.json({
+      success: true,
+      friends: transformedFriends
+    });
+
+  } catch (error) {
+    console.error('Error fetching friends:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch friends'
+    });
+  }
+});
+
+// GET /api/friends/requests/:userId - Get friend requests
+app.get('/api/friends/requests/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const usersCollection = viewDocDB.getCollection('users');
+
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { friendRequests: 1 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get request sender details
+    const requests = await usersCollection.find({
+      _id: { $in: user.friendRequests || [] }
+    })
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1 })
+    .toArray();
+
+    const transformedRequests = requests.map(request => ({
+      id: request._id,
+      avatar: (request.avatar && request.avatar.data) ? 
+        `http://localhost:3000/api/users/${request._id}/avatar` : 
+        '/default-avatar.png',
+      name: `${request.name} ${request.surname}`,
+      meta: `${request.skills?.[0] || 'Developer'} • ${Math.floor(Math.random() * 5) + 1} mutual connections`
+    }));
+
+    res.json({
+      success: true,
+      requests: transformedRequests
+    });
+
+  } catch (error) {
+    console.error('Error fetching friend requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch friend requests'
+    });
+  }
+});
+
+// GET /api/friends/suggestions/:userId - Get friend suggestions
+app.get('/api/friends/suggestions/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Get current user
+    const currentUser = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { skills: 1, friends: 1, friendRequests: 1, removedFriends: 1 } }
+    );
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find users with similar skills who are not already friends or have pending requests
+    const excludedUsers = [
+      new ObjectId(userId),
+      ...(currentUser.friends || []),
+      ...(currentUser.friendRequests || [])
+    ];
+
+    // Prioritize previously connected users (removed friends)
+    let query = {
+      _id: { $not: { $in: excludedUsers } }
+    };
+
+    // If user has skills, show users with similar skills first
+    if (currentUser.skills && currentUser.skills.length > 0) {
+      query.skills = { $in: currentUser.skills };
+    }
+
+    const suggestions = await usersCollection.find(query)
+    .limit(12) // Increased limit to show more suggestions
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, projects: 1 })
+    .toArray();
+
+    // Transform suggestions and mark previously connected users
+    const transformedSuggestions = suggestions.map(suggestion => {
+      const wasConnected = currentUser.removedFriends && 
+        currentUser.removedFriends.some(removedId => removedId.equals(suggestion._id));
+      
+      return {
+        id: suggestion._id,
+        avatar: (suggestion.avatar && suggestion.avatar.data) ? 
+          `http://localhost:3000/api/users/${suggestion._id}/avatar` : 
+          '/default-avatar.png',
+        name: `${suggestion.name} ${suggestion.surname}`,
+        title: suggestion.bio || 'Developer',
+        skills: suggestion.skills || [],
+        projects: suggestion.projects ? suggestion.projects.length : 0,
+        followers: Math.floor(Math.random() * 2000) + 100,
+        wasConnected: wasConnected // Flag to show "Reconnect" instead of "Connect"
+      };
+    });
+
+    res.json({
+      success: true,
+      suggestions: transformedSuggestions
+    });
+
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch suggestions'
+    });
+  }
+});
+
+// POST /api/friends/request - Send friend request
+app.post('/api/friends/request', authenticateUser, async (req, res) => {
+  try {
+    const { fromUserId, toUserId } = req.body;
+
+    if (fromUserId !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only send requests from your own account'
+      });
+    }
+
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Add to recipient's friendRequests array
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(toUserId) },
+      { $addToSet: { friendRequests: new ObjectId(fromUserId) } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Friend request sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Error sending friend request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send friend request'
+    });
+  }
+});
+
+// POST /api/friends/accept - Accept friend request
+app.post('/api/friends/accept', authenticateUser, async (req, res) => {
+  try {
+    const { userId, requestUserId } = req.body;
+
+    if (userId !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only accept requests for your own account'
+      });
+    }
+
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Remove from friendRequests and add to friends for both users
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $pull: { friendRequests: new ObjectId(requestUserId) },
+        $addToSet: { friends: new ObjectId(requestUserId) }
+      }
+    );
+
+    await usersCollection.updateOne(
+      { _id: new ObjectId(requestUserId) },
+      { $addToSet: { friends: new ObjectId(userId) } }
+    );
+
+    res.json({
+      success: true,
+      message: 'Friend request accepted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error accepting friend request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to accept friend request'
+    });
+  }
+});
+
+// POST /api/friends/decline - Decline friend request
+app.post('/api/friends/decline', authenticateUser, async (req, res) => {
+  try {
+    const { userId, requestUserId } = req.body;
+
+    if (userId !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only decline requests for your own account'
+      });
+    }
+
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Remove from friendRequests
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { friendRequests: new ObjectId(requestUserId) } }
+    );
+
+    res.json({
+      success: true,
+      message: 'Friend request declined successfully'
+    });
+
+  } catch (error) {
+    console.error('Error declining friend request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to decline friend request'
+    });
+  }
+});
+
+// DELETE /api/friends/remove - Remove friend
+app.delete('/api/friends/remove', authenticateUser, async (req, res) => {
+  try {
+    const { userId, friendId } = req.body;
+
+    if (userId !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only remove friends from your own account'
+      });
+    }
+
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Remove from friends for both users
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { friends: new ObjectId(friendId) } }
+    );
+
+    await usersCollection.updateOne(
+      { _id: new ObjectId(friendId) },
+      { $pull: { friends: new ObjectId(userId) } }
+    );
+
+    res.json({
+      success: true,
+      message: 'Friend removed successfully',
+      removedFriendId: friendId // Return the ID so frontend can add to suggestions
+    });
+
+  } catch (error) {
+    console.error('Error removing friend:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove friend'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({
