@@ -1,4 +1,6 @@
 import React from 'react';
+import FriendCard from '../friends/FriendCard';
+//frontend\src\components\friends\FriendCard.js
 
 const ProfileFriends = ({ friends }) => {
   return (
@@ -10,15 +12,11 @@ const ProfileFriends = ({ friends }) => {
       
       <div className="friends-grid">
         {friends.map((friend, index) => (
-          <div key={index} className="friend-card">
-            <img src={friend.avatar} alt={friend.name} className="friend-avatar" />
-            <h3 className="friend-name">{friend.name}</h3>
-            <p className="friend-title">{friend.title}</p>
-            <div className="friend-actions">
-              <button className="friend-btn primary-btn">Message</button>
-              <button className="friend-btn secondary-btn">Profile</button>
-            </div>
-          </div>
+          <FriendCard 
+            key={friend.id || index} 
+            friend={friend}
+            isSuggestion={false}
+          />
         ))}
         {friends.length === 0 && (
           <p className="no-friends">No friends yet</p>

@@ -2,9 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const FriendCard = ({ friend, isSuggestion = false, onRemove, onConnect }) => {
+  // Get the friend's user ID for the profile link
+  const friendId = friend.id || friend._id;
+
   return (
     <div className="friend-card">
-      <Link to={`/profile/${friend.id}`} className="friend-link">
+      <Link to={`/profile/${friendId}`} className="friend-link">
         <img 
           src={friend.avatar} 
           alt="Friend" 
@@ -44,7 +47,7 @@ const FriendCard = ({ friend, isSuggestion = false, onRemove, onConnect }) => {
       <div className="friend-actions">
         <button 
           className={`friend-btn ${friend.wasConnected ? 'reconnect-btn' : 'primary-btn'}`}
-          onClick={() => isSuggestion ? onConnect(friend.id) : null}
+          onClick={() => isSuggestion ? onConnect(friendId) : null}
         >
           {friend.wasConnected ? 'Reconnect' : (isSuggestion ? 'Connect' : 'Message')}
         </button>
@@ -57,7 +60,9 @@ const FriendCard = ({ friend, isSuggestion = false, onRemove, onConnect }) => {
           </button>
         )}
         {isSuggestion && (
-          <button className="friend-btn secondary-btn">View Profile</button>
+          <Link to={`/profile/${friendId}`} className="friend-btn secondary-btn">
+            View Profile
+          </Link>
         )}
       </div>
     </div>

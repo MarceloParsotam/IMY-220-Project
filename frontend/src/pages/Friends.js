@@ -21,6 +21,7 @@ const Friends = () => {
   };
 
   // Fetch all friends data
+  // Inside fetchFriendsData function in Friends.js
   const fetchFriendsData = async () => {
     if (!currentUser) return;
 
@@ -38,10 +39,24 @@ const Friends = () => {
 
       if (friendsResponse.ok) {
         const friendsData = await friendsResponse.json();
-        setFriends(friendsData.friends || []);
+        
+        // Transform friends data to include proper IDs and structure
+        const transformedFriends = (friendsData.friends || []).map(friend => ({
+          id: friend._id || friend.id,
+          name: `${friend.name || ''} ${friend.surname || ''}`.trim() || friend.username,
+          username: friend.username,
+          avatar: friend.avatar || '/default-avatar.png',
+          title: friend.title || friend.bio || 'User',
+          projects: friend.projects ? friend.projects.length : 0,
+          followers: friend.followers || 0,
+          skills: friend.skills || [],
+          wasConnected: friend.wasConnected || false
+        }));
+        
+        setFriends(transformedFriends);
       }
 
-      // Fetch requests
+      // Similarly transform requests and suggestions data...
       const requestsResponse = await fetch(`http://localhost:3000/api/friends/requests/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -51,10 +66,16 @@ const Friends = () => {
 
       if (requestsResponse.ok) {
         const requestsData = await requestsResponse.json();
-        setRequests(requestsData.requests || []);
+        const transformedRequests = (requestsData.requests || []).map(request => ({
+          id: request._id || request.id,
+          name: `${request.name || ''} ${request.surname || ''}`.trim() || request.username,
+          avatar: request.avatar || '/default-avatar.png',
+          title: request.title || request.bio || 'User'
+        }));
+        setRequests(transformedRequests);
       }
 
-      // Fetch suggestions
+      // Fetch and transform suggestions similarly...
       const suggestionsResponse = await fetch(`http://localhost:3000/api/friends/suggestions/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -64,7 +85,17 @@ const Friends = () => {
 
       if (suggestionsResponse.ok) {
         const suggestionsData = await suggestionsResponse.json();
-        setSuggestions(suggestionsData.suggestions || []);
+        const transformedSuggestions = (suggestionsData.suggestions || []).map(suggestion => ({
+          id: suggestion._id || suggestion.id,
+          name: `${suggestion.name || ''} ${suggestion.surname || ''}`.trim() || suggestion.username,
+          avatar: suggestion.avatar || '/default-avatar.png',
+          title: suggestion.title || suggestion.bio || 'User',
+          projects: suggestion.projects ? suggestion.projects.length : 0,
+          followers: suggestion.followers || 0,
+          skills: suggestion.skills || [],
+          wasConnected: suggestion.wasConnected || false
+        }));
+        setSuggestions(transformedSuggestions);
       }
 
     } catch (error) {
