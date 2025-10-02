@@ -1,7 +1,16 @@
 import React from 'react';
 import ProjectCard from './ProjectCard';
 
-const ProjectGrid = ({ projects, activeTab, searchQuery, filterType, onCheckoutUpdate }) => {
+const ProjectGrid = ({ 
+  projects, 
+  activeTab, 
+  searchQuery, 
+  filterType, 
+  onCheckoutUpdate, 
+  onDeleteProject, 
+  onEditProject,
+  onFavoriteUpdate 
+}) => {
   const filteredProjects = projects.filter(project => {
     // Filter by search query
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -32,6 +41,9 @@ const ProjectGrid = ({ projects, activeTab, searchQuery, filterType, onCheckoutU
           key={project.id} 
           project={project} 
           onCheckoutUpdate={onCheckoutUpdate}
+          onDeleteProject={onDeleteProject}
+          onEditProject={onEditProject}
+          onFavoriteUpdate={onFavoriteUpdate}
         />
       ))}
     </div>

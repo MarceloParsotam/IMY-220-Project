@@ -235,6 +235,15 @@ useEffect(() => {
     }
   };
 
+  const handleFavoriteUpdate = (projectId, isFavorite) => {
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.id === projectId 
+          ? { ...project, isFavorite } 
+          : project
+      )
+    );
+  };
   // Calculate counts for tabs
   const getTabCounts = () => {
     const allCount = projects.length;
@@ -405,6 +414,7 @@ useEffect(() => {
             onCheckoutUpdate={handleCheckoutUpdate}
             onDeleteProject={handleDeleteProject}
             onEditProject={handleEditProject}
+            onFavoriteUpdate={handleFavoriteUpdate}
           />
         </main>
         

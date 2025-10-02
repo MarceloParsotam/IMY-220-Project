@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import EditProjectModal from './EditProjectModal';
 
-const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject }) => {
+const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject, onFavoriteUpdate }) => {
   const [isCheckedOut, setIsCheckedOut] = useState(project.isCheckedOut || false);
   const [currentCheckout, setCurrentCheckout] = useState(project.currentCheckout || null);
   const [isFavorite, setIsFavorite] = useState(project.isFavorite || false);
   const [loading, setLoading] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const { currentUser } = useAuth();
 
@@ -40,7 +41,8 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
 
   useEffect(() => {
     fetchCheckoutStatus();
-  }, [project.id]);
+    setIsFavorite(project.isFavorite || false);
+  }, [project.id, project.isFavorite]);
 
   const handleCheckout = async () => {
     try {
@@ -118,9 +120,56 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
     }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    // Add API call here for actual favorite functionality
+  const toggleFavorite = async () => {
+    try {
+      setFavoriteLoading(true);
+      const token = getToken();
+
+      if (isFavorite) {
+        // Remove from favorites
+        const response = await fetch(`http://localhost:3000/api/projects/${project.id}/favorite`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          setIsFavorite(false);
+          if (onFavoriteUpdate) {
+            onFavoriteUpdate(project.id, false);
+          }
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Failed to remove from favorites');
+        }
+      } else {
+        // Add to favorites
+        const response = await fetch(`http://localhost:3000/api/projects/${project.id}/favorite`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          setIsFavorite(true);
+          if (onFavoriteUpdate) {
+            onFavoriteUpdate(project.id, true);
+          }
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Failed to add to favorites');
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorites');
+    } finally {
+      setFavoriteLoading(false);
+    }
   };
 
   const handleEdit = () => {
@@ -169,14 +218,15 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
               {isCheckedOut ? `Checked Out (${currentCheckout?.userName || 'Someone'})` : 'Checked In'}
             </div>
             <div 
-              className={`project-favorite ${isFavorite ? 'favorite-active' : ''}`}
+              className={`project-favorite ${isFavorite ? 'favorite-active' : ''} ${favoriteLoading ? 'loading' : ''}`}
               onClick={toggleFavorite}
               style={{ cursor: 'pointer' }}
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
-              {isFavorite ? 'FAVORITE' : 'Add to Favorites'}
+              {favoriteLoading ? '...' : (isFavorite ? 'FAVORITE' : 'Add to Favorites')}
             </div>
           </div>
         </div>

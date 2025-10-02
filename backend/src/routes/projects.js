@@ -5,11 +5,13 @@ const viewDocDB = require('../viewDocDB');
 const { authenticateUser } = require('../middleware/auth');
 
 // GET /api/projects/all - Get all public projects and user's projects
+// GET /api/projects/all - Get all public projects and user's projects
 router.get('/all', authenticateUser, async (req, res) => {
     try {
         const userId = req.user._id;
         const projectsCollection = viewDocDB.getCollection('projects');
         const checkoutsCollection = viewDocDB.getCollection('checkouts');
+        const favoritesCollection = viewDocDB.getCollection('favorites');
 
         // Get all public projects AND user's own projects (even if private)
         const projects = await projectsCollection.find({ 
@@ -21,6 +23,13 @@ router.get('/all', authenticateUser, async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .toArray();
+
+        // Get user's favorites
+        const userFavorites = await favoritesCollection.find({
+            userId: new ObjectId(userId)
+        }).toArray();
+
+        const favoriteProjectIds = userFavorites.map(fav => fav.projectId.toString());
 
         // Get current checkout status for each project
         const projectsWithCheckoutStatus = await Promise.all(
@@ -51,8 +60,8 @@ router.get('/all', authenticateUser, async (req, res) => {
                         checkedOutAt: activeCheckout.checkedOutAt,
                         expectedReturn: activeCheckout.expectedReturn
                     } : null,
-                    // Frontend fields
-                    isFavorite: project.isFavorite || false,
+                    // Favorite information
+                    isFavorite: favoriteProjectIds.includes(project._id.toString()),
                     lastUpdated: formatTimeAgo(project.updatedAt || project.createdAt),
                     version: project.version || 'v1.0.0',
                     created: formatDate(project.createdAt),
@@ -610,6 +619,195 @@ router.delete('/:projectId', authenticateUser, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to delete project'
+        });
+    }
+});
+
+// POST /api/projects/:projectId/favorite - Add project to favorites
+router.post('/:projectId/favorite', authenticateUser, async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const userId = req.user._id;
+
+        const projectsCollection = viewDocDB.getCollection('projects');
+        const favoritesCollection = viewDocDB.getCollection('favorites');
+
+        // Check if project exists
+        const project = await projectsCollection.findOne({
+            _id: new ObjectId(projectId)
+        });
+
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found'
+            });
+        }
+
+        // Check if already favorited
+        const existingFavorite = await favoritesCollection.findOne({
+            userId: new ObjectId(userId),
+            projectId: new ObjectId(projectId)
+        });
+
+        if (existingFavorite) {
+            return res.status(400).json({
+                success: false,
+                message: 'Project is already in your favorites'
+            });
+        }
+
+        // Add to favorites
+        const favoriteData = {
+            userId: new ObjectId(userId),
+            projectId: new ObjectId(projectId),
+            favoritedAt: new Date()
+        };
+
+        await favoritesCollection.insertOne(favoriteData);
+
+        // Create activity
+        const activitiesCollection = viewDocDB.getCollection('activities');
+        await activitiesCollection.insertOne({
+            userId: new ObjectId(userId),
+            type: 'project_favorited',
+            title: 'Project Favorited',
+            description: `Added project to favorites: ${project.name}`,
+            date: new Date(),
+            projectId: new ObjectId(projectId)
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Project added to favorites',
+            favorite: favoriteData
+        });
+
+    } catch (error) {
+        console.error('Error favoriting project:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add project to favorites'
+        });
+    }
+});
+
+// DELETE /api/projects/:projectId/favorite - Remove project from favorites
+router.delete('/:projectId/favorite', authenticateUser, async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const userId = req.user._id;
+
+        const favoritesCollection = viewDocDB.getCollection('favorites');
+
+        // Remove from favorites
+        const result = await favoritesCollection.deleteOne({
+            userId: new ObjectId(userId),
+            projectId: new ObjectId(projectId)
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project was not in your favorites'
+            });
+        }
+
+        // Create activity
+        const activitiesCollection = viewDocDB.getCollection('activities');
+        await activitiesCollection.insertOne({
+            userId: new ObjectId(userId),
+            type: 'project_unfavorited',
+            title: 'Project Removed from Favorites',
+            description: `Removed project from favorites`,
+            date: new Date(),
+            projectId: new ObjectId(projectId)
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Project removed from favorites'
+        });
+
+    } catch (error) {
+        console.error('Error unfavoriting project:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to remove project from favorites'
+        });
+    }
+});
+
+// GET /api/projects/favorites/:userId - Get user's favorite projects
+router.get('/favorites/:userId', authenticateUser, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const favoritesCollection = viewDocDB.getCollection('favorites');
+        const projectsCollection = viewDocDB.getCollection('projects');
+        const checkoutsCollection = viewDocDB.getCollection('checkouts');
+
+        // Get user's favorite project IDs
+        const favorites = await favoritesCollection.find({
+            userId: new ObjectId(userId)
+        }).toArray();
+
+        const favoriteProjectIds = favorites.map(fav => fav.projectId);
+
+        // Get the actual projects
+        const projects = await projectsCollection.find({
+            _id: { $in: favoriteProjectIds }
+        }).toArray();
+
+        // Get current checkout status for each project
+        const projectsWithCheckoutStatus = await Promise.all(
+            projects.map(async (project) => {
+                const activeCheckout = await checkoutsCollection.findOne({
+                    projectId: project._id,
+                    returnedAt: null
+                });
+
+                return {
+                    id: project._id.toString(),
+                    _id: project._id,
+                    name: project.name,
+                    title: project.name,
+                    description: project.description,
+                    type: project.type || 'Web Application',
+                    tags: project.tags || [],
+                    isPublic: project.isPublic !== undefined ? project.isPublic : true,
+                    createdAt: project.createdAt,
+                    updatedAt: project.updatedAt,
+                    status: project.status || 'active',
+                    userId: project.userId,
+                    // Checkout information
+                    isCheckedOut: !!activeCheckout,
+                    currentCheckout: activeCheckout ? {
+                        userId: activeCheckout.userId,
+                        userName: activeCheckout.userName,
+                        checkedOutAt: activeCheckout.checkedOutAt,
+                        expectedReturn: activeCheckout.expectedReturn
+                    } : null,
+                    // Frontend fields
+                    isFavorite: true, // These are all favorites
+                    lastUpdated: formatTimeAgo(project.updatedAt || project.createdAt),
+                    version: project.version || 'v1.0.0',
+                    created: formatDate(project.createdAt),
+                    // Ownership info for frontend
+                    isOwnedByUser: project.userId.toString() === userId.toString(),
+                    isCollaborator: project.collaborators && project.collaborators.some(collab => 
+                        collab.userId.toString() === userId.toString()
+                    )
+                };
+            })
+        );
+
+        res.json(projectsWithCheckoutStatus);
+
+    } catch (error) {
+        console.error('Error fetching favorite projects:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch favorite projects'
         });
     }
 });
