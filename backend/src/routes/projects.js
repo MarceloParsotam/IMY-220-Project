@@ -1181,5 +1181,282 @@ router.post('/:projectId/checkout-message', authenticateUser, async (req, res) =
     });
   }
 });
+// In projects.js - REPLACE the file routes with these:
+
+// Add file to project
+router.post('/:projectId/files', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { name, content, type, path, changes, time } = req.body;
+    const userId = req.user._id;
+    const userName = req.user.name || req.user.username;
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    // Check if project exists
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    // Create new file object
+    const newFile = {
+      name,
+      content: type === 'file' ? content : '',
+      type: type || 'file',
+      path: path || '',
+      changes: changes || userName,
+      time: time || 'Just now',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Update project with new file
+    const result = await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $push: { files: newFile },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Failed to add file' 
+      });
+    }
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'file_added',
+      title: 'File Added',
+      description: `Added ${type === 'folder' ? 'folder' : 'file'}: ${name} to project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        fileName: name,
+        fileType: type
+      }
+    });
+
+    res.json({ 
+      success: true,
+      message: 'File added successfully', 
+      file: newFile 
+    });
+  } catch (error) {
+    console.error('Error adding file:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
+
+// Get file content
+router.post('/:projectId/files/content', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { fileName, path } = req.body;
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    // Find the file in project's files array
+    const file = project.files?.find(f => 
+      f.name === fileName && (f.path === path || (!f.path && !path))
+    );
+
+    if (!file) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'File not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      name: file.name,
+      content: file.content || '',
+      type: file.type,
+      changes: file.changes,
+      time: file.time
+    });
+  } catch (error) {
+    console.error('Error fetching file content:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
+
+// Update file content
+router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { fileName, path, content, changes } = req.body;
+    const userId = req.user._id;
+    const userName = req.user.name || req.user.username;
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    // Update the specific file in the files array
+    const result = await projectsCollection.updateOne(
+      { 
+        _id: new ObjectId(projectId),
+        'files.name': fileName,
+        'files.path': path || ''
+      },
+      { 
+        $set: { 
+          'files.$.content': content,
+          'files.$.changes': changes || userName,
+          'files.$.time': 'Just now',
+          'files.$.updatedAt': new Date(),
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Failed to update file' 
+      });
+    }
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'file_updated',
+      title: 'File Updated',
+      description: `Updated file: ${fileName} in project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        fileName: fileName
+      }
+    });
+
+    res.json({ 
+      success: true,
+      message: 'File updated successfully' 
+    });
+  } catch (error) {
+    console.error('Error updating file:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
+
+// Add discussion to project
+router.post('/:projectId/discussion', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { content, userName } = req.body;
+    const userId = req.user._id;
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    // Check if project exists
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    // Create new discussion object
+    const newDiscussion = {
+      user: userName || req.user.name || req.user.username,
+      content: content,
+      time: new Date().toISOString(),
+      createdAt: new Date(),
+      userId: new ObjectId(userId)
+    };
+
+    // Update project with new discussion
+    const result = await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $push: { discussions: newDiscussion },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Failed to add discussion' 
+      });
+    }
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'discussion_added',
+      title: 'Discussion Added',
+      description: `Added discussion to project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name
+      }
+    });
+
+    res.json({ 
+      success: true,
+      message: 'Discussion added successfully', 
+      discussion: newDiscussion 
+    });
+  } catch (error) {
+    console.error('Error adding discussion:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
 
 module.exports = router;
