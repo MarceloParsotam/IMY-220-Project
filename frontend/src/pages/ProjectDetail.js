@@ -1,121 +1,188 @@
+// ProjectDetail.js - UPDATED
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import ProjectHeader from '../components/projectDetails/ProjectHeader';
 import ProjectAbout from '../components/projectDetails/ProjectAbout';
 import MessagesSection from '../components/projectDetails/MessagesSection';
 import ProjectTabs from '../components/projectDetails/ProjectTabs';
 import EditProject from '../components/projectDetails/EditProject';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProjectDetail = () => {
-  const { id } = useParams(); // This captures the dynamic id from the URL
+  const { projectId } = useParams(); // CHANGED: from 'id' to 'projectId'
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const { currentUser } = useAuth();
 
-  // Sample project data - in a real app, this would come from an API based on the id
-  const sampleProject = {
-    id: id || 'default',
-    name: 'React Dashboard',
-    username: 'developer123',
-    startDate: '15 Jan 2023',
-    views: 1250,
-    languages: ['JavaScript', 'TypeScript', 'CSS'],
-    description: 'A customizable admin dashboard built with React and Material UI. Features data visualization and user management.',
-    members: ['John Doe', 'Jane Smith', 'Mike Johnson'],
-    technologies: ['React', 'Node.js', 'MongoDB', 'Express'],
-    downloads: 543,
-    stars: 128,
-    version: 'v1.2.5',
-    messages: [
-      { user: 'John Doe', time: '2 hours ago', message: 'Fixed responsive issues' },
-      { user: 'Jane Smith', time: '5 hours ago', message: 'Updated dependencies' },
-      { user: 'Mike Johnson', time: '1 day ago', message: 'Added new chart component' }
-    ],
-    checkoutMessages: [
-      { user: 'Sarah Wilson', time: '3 hours ago', message: 'Working on new feature implementation' },
-      { user: 'Mike Chen', time: '1 day ago', message: 'Fixing bug in authentication module' }
-    ],
-    files: [
-      { name: 'src/components', type: 'folder', changes: 'Member 1', time: '2 hours ago' },
-      { name: 'src/utils', type: 'folder', changes: 'Member 2', time: '5 hours ago' },
-      { name: 'src/styles', type: 'folder', changes: 'Member 3', time: '1 day ago' },
-      { name: 'package.json', type: 'file', changes: 'Member 1', time: '2 hours ago' },
-      { name: 'README.md', type: 'file', changes: 'Member 2', time: '5 hours ago' }
-    ],
-    discussions: [
-      {
-        user: 'User 1',
-        time: '3 days ago',
-        content: 'Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa. Sit nulla nihil est aspernatur itaque hic consequuntur corrupti eos iusto iste. Ut totam provident et exercitationem cumque aut dolores vitae qui voluptatem voluptate.'
-      },
-      {
-        user: 'User 2',
-        time: '1 week ago',
-        content: 'Ut fugit autem est sunt quis qui repudiandae consequatur qui repudiandae tenetur qui voluptates tenetur aut suscipit fugiti. Lorem ipsum dolor sit amet. Et facilis ducimus non laboriosam sunt et nesciunt quasi et ipsa voluptatem a quidem culpa.'
-      }
-    ]
+  console.log('ProjectDetail - projectId from useParams:', projectId); // Debug log
+
+  // Get token from localStorage
+  const getToken = () => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    return userData?._id || userData?.id || '';
   };
 
-  // Simulate API call to fetch project data based on ID
-  useEffect(() => {
-    const fetchProjectData = async () => {
+  // Fetch project data from API
+  const fetchProjectData = async (pid) => {
+    if (!pid) {
+      setError('Project ID is missing');
+      setLoading(false);
+      return;
+    }
+
+    try {
       setLoading(true);
-      try {
-        // In a real app, you would fetch data from an API:
-        // const response = await fetch(`/api/projects/${id}`);
-        // const projectData = await response.json();
-        
-        // For now, we'll use the sample data but customize it based on the ID
-        const projectData = {
-          ...sampleProject,
-          name: `Project ${id}`,
-          description: `This is project with ID: ${id}. A customizable admin dashboard built with React and Material UI.`,
-          // You can customize other fields based on the ID if needed
-        };
-        
-        setProject(projectData);
-      } catch (error) {
-        console.error('Error fetching project data:', error);
-        // Fallback to sample data
-        setProject(sampleProject);
-      } finally {
-        setLoading(false);
+      setError('');
+      const token = getToken();
+
+      console.log('Fetching project with ID:', pid);
+
+      const response = await fetch(`http://localhost:3000/api/projects/${pid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Project not found');
+        } else {
+          throw new Error(`Failed to fetch project: ${response.status}`);
+        }
       }
-    };
 
-    fetchProjectData();
-  }, [id]); // This effect runs when the id changes
-
-  const handleAddMessage = (message, type) => {
-    const newMessage = {
-      user: 'You', // Current user
-      time: 'Just now',
-      message: message
-    };
-    
-    if (type === 'checkin') {
-      setProject({
-        ...project,
-        messages: [...project.messages, newMessage]
-      });
-    } else {
-      setProject({
-        ...project,
-        checkoutMessages: [...project.checkoutMessages, newMessage]
-      });
+      const projectData = await response.json();
+      console.log('Project data received:', projectData);
+      
+      setProject(projectData);
+    } catch (error) {
+      console.error('Error fetching project:', error);
+      setError(error.message);
+      setProject(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSaveProject = (updatedData) => {
-    setProject({
-      ...project,
-      ...updatedData,
-      // Ensure arrays are properly formatted
-      technologies: Array.isArray(updatedData.technologies) ? updatedData.technologies : [],
-      members: Array.isArray(updatedData.members) ? updatedData.members : []
-    });
-    setIsEditing(false);
+  useEffect(() => {
+    console.log('useEffect triggered with projectId:', projectId);
+    
+    if (projectId) {
+      fetchProjectData(projectId);
+    } else {
+      setError('No project ID found in URL');
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  // Update all functions to use projectId instead of id
+  const handleAddMessage = async (message, type) => {
+    if (!project || !currentUser) return;
+
+    try {
+      const token = getToken();
+      const endpoint = type === 'checkin' 
+        ? `http://localhost:3000/api/projects/${projectId}/checkin`
+        : `http://localhost:3000/api/projects/${projectId}/checkout`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+      });
+
+      if (response.ok) {
+        await fetchProjectData(projectId);
+      } else {
+        console.error('Failed to add message');
+        setError('Failed to add message');
+      }
+    } catch (error) {
+      console.error('Error adding message:', error);
+      setError('Error adding message');
+    }
+  };
+
+  const handleSaveProject = async (updatedData) => {
+    if (!project || !currentUser) return;
+
+    try {
+      const token = getToken();
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        await fetchProjectData(projectId);
+        setIsEditing(false);
+      } else {
+        console.error('Failed to update project');
+        setError('Failed to update project');
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+      setError('Error updating project');
+    }
+  };
+
+  const handleCheckout = async () => {
+    const message = prompt('Enter checkout message:');
+    if (message !== null) {
+      await handleAddMessage(message, 'checkout');
+    }
+  };
+
+  const handleCheckin = async () => {
+    const message = prompt('Enter checkin message:');
+    if (message !== null) {
+      await handleAddMessage(message, 'checkin');
+    }
+  };
+
+  const handleFavorite = async () => {
+    if (!project || !currentUser) return;
+
+    try {
+      const token = getToken();
+      const endpoint = `http://localhost:3000/api/projects/${projectId}/favorite`;
+      const method = project.isFavorite ? 'DELETE' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        await fetchProjectData(projectId);
+      } else {
+        console.error('Failed to toggle favorite');
+        setError('Failed to toggle favorite');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setError('Error toggling favorite');
+    }
+  };
+
+  const handleRetry = () => {
+    setError('');
+    fetchProjectData(projectId);
   };
 
   if (loading) {
@@ -126,10 +193,27 @@ const ProjectDetail = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="home-container">
+        <div className="error">
+          <p>Error: {error}</p>
+          <p>Project ID from URL: {projectId || 'Not found'}</p>
+          <button onClick={handleRetry} className="retry-btn">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!project) {
     return (
       <div className="home-container">
-        <div className="error">Project not found</div>
+        <div className="error">
+          <p>Project not found</p>
+          <p>ID: {projectId}</p>
+        </div>
       </div>
     );
   }
@@ -138,13 +222,20 @@ const ProjectDetail = () => {
     <div className="home-container">
       <div className="project-detail-container">
         <div className="project-header-actions">
-          <ProjectHeader project={project} />
-          <button 
-            className="edit-project-btn"
-            onClick={() => setIsEditing(true)}
-          >
-            Edit Project
-          </button>
+          <ProjectHeader 
+            project={project} 
+            onCheckout={handleCheckout}
+            onCheckin={handleCheckin}
+            onFavorite={handleFavorite}
+          />
+          {project.userId && currentUser && (project.userId.toString() === (currentUser._id || currentUser.id).toString()) && (
+            <button 
+              className="edit-project-btn"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit Project
+            </button>
+          )}
         </div>
 
         <hr className="divider" />
@@ -154,8 +245,8 @@ const ProjectDetail = () => {
         <hr className="divider" />
 
         <MessagesSection 
-          messages={project.messages}
-          checkoutMessages={project.checkoutMessages}
+          messages={project.messages || []}
+          checkoutMessages={project.checkoutMessages || []}
           onAddCheckinMessage={(message) => handleAddMessage(message, 'checkin')}
           onAddCheckoutMessage={(message) => handleAddMessage(message, 'checkout')}
         />

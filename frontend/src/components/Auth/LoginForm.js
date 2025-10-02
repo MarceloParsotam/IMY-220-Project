@@ -119,10 +119,4 @@ const LoginForm = ({ switchToRegister, isActive }) => {
   );
 };
 
-// Add default props to handle cases where isActive is not passed
-LoginForm.defaultProps = {
-  isActive: true,
-  switchToRegister: () => console.log('Switch to register clicked')
-};
-
 export default LoginForm;

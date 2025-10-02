@@ -240,10 +240,4 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
   );
 };
 
-// Add default props
-RegisterForm.defaultProps = {
-  isActive: true,
-  switchToLogin: () => console.log('Switch to login clicked')
-};
-
 export default RegisterForm;

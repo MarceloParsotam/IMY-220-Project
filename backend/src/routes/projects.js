@@ -811,5 +811,212 @@ router.get('/favorites/:userId', authenticateUser, async (req, res) => {
         });
     }
 });
+// GET /api/projects/:id - Get specific project by ID
+// In projects.js - UPDATE the existing GET /api/projects/:id route
+router.get('/:id', authenticateUser, async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+    const checkoutsCollection = viewDocDB.getCollection('checkouts');
+    const favoritesCollection = viewDocDB.getCollection('favorites');
+    
+    // Get the project
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Get user info for the project owner
+    const user = await usersCollection.findOne({
+      _id: project.userId
+    });
+
+    // Check if project is checked out
+    const activeCheckout = await checkoutsCollection.findOne({
+      projectId: new ObjectId(projectId),
+      returnedAt: null
+    });
+
+    // Check if current user has favorited this project
+    const userFavorite = await favoritesCollection.findOne({
+      userId: new ObjectId(req.user._id),
+      projectId: new ObjectId(projectId)
+    });
+
+    // Format the project with all the fields the frontend expects
+    const formattedProject = {
+      // Basic project info from database
+      id: project._id.toString(),
+      _id: project._id,
+      name: project.name,
+      description: project.description,
+      type: project.type,
+      tags: project.tags || [],
+      isPublic: project.isPublic !== undefined ? project.isPublic : true,
+      userId: project.userId,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+      
+      // Fields the frontend expects
+      username: user ? user.username : 'Unknown User',
+      startDate: project.createdAt ? new Date(project.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }) : 'Unknown date',
+      views: project.views || Math.floor(Math.random() * 1000) + 100,
+      languages: project.languages || project.tags || ['JavaScript', 'React'],
+      
+      // Members data
+      members: project.members || (user ? [user.username] : ['Project Owner']),
+      
+      // Technologies
+      technologies: project.technologies || project.tags || ['React', 'Node.js', 'MongoDB'],
+      
+      // Stats
+      downloads: project.downloads || Math.floor(Math.random() * 500) + 50,
+      stars: project.stars || Math.floor(Math.random() * 200) + 10,
+      version: project.version || 'v1.0.0',
+      
+      // Messages and discussions
+      messages: project.messages || [],
+      checkoutMessages: project.checkoutMessages || [],
+      
+      // Files data
+      files: project.files || [
+        { name: 'src/components', type: 'folder', changes: 'Member 1', time: '2 hours ago' },
+        { name: 'src/utils', type: 'folder', changes: 'Member 2', time: '5 hours ago' },
+        { name: 'package.json', type: 'file', changes: 'Member 1', time: '2 hours ago' },
+        { name: 'README.md', type: 'file', changes: 'Member 2', time: '5 hours ago' }
+      ],
+      
+      // Discussions
+      discussions: project.discussions || [
+        {
+          user: 'Developer123',
+          time: '3 days ago',
+          content: 'This project looks great! Looking forward to collaborating.'
+        }
+      ],
+      
+      // Checkout status
+      isCheckedOut: !!activeCheckout,
+      isFavorite: !!userFavorite,
+      
+      // Current checkout info if checked out
+      currentCheckout: activeCheckout ? {
+        userId: activeCheckout.userId,
+        userName: activeCheckout.userName,
+        checkedOutAt: activeCheckout.checkedOutAt
+      } : null
+    };
+
+    res.json(formattedProject);
+  } catch (error) {
+    console.error('Error fetching project:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ===DEBUG ROUTE - REMOVE IN PRODUCTION=== //
+// Add this temporary debug route to test the individual project endpoint
+router.get('/debug/:id', authenticateUser, async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    console.log('Debug: Fetching project with ID:', projectId);
+    
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+    
+    // Get the project
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+    
+    console.log('Debug: Found project:', project);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Get user info for the project owner
+    const user = await usersCollection.findOne({
+      _id: project.userId
+    });
+
+    console.log('Debug: Found user:', user);
+
+    // Format the project with all the fields the frontend expects
+    const formattedProject = {
+      // Basic project info from database
+      id: project._id.toString(),
+      _id: project._id,
+      name: project.name,
+      description: project.description,
+      type: project.type,
+      tags: project.tags || [],
+      isPublic: project.isPublic !== undefined ? project.isPublic : true,
+      userId: project.userId,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+      
+      // Fields the frontend expects but aren't in database - add defaults
+      username: user ? user.username : 'Unknown User',
+      startDate: project.createdAt ? new Date(project.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }) : 'Unknown date',
+      views: project.views || Math.floor(Math.random() * 1000) + 100,
+      languages: project.languages || project.tags || ['JavaScript', 'React'],
+      
+      // Members data
+      members: project.members || (user ? [user.username] : ['Project Owner']),
+      
+      // Technologies - use tags or default
+      technologies: project.technologies || project.tags || ['React', 'Node.js', 'MongoDB'],
+      
+      // Stats
+      downloads: project.downloads || Math.floor(Math.random() * 500) + 50,
+      stars: project.stars || Math.floor(Math.random() * 200) + 10,
+      version: project.version || 'v1.0.0',
+      
+      // Messages and discussions
+      messages: project.messages || [],
+      checkoutMessages: project.checkoutMessages || [],
+      
+      // Files data
+      files: project.files || [
+        { name: 'src/components', type: 'folder', changes: 'Member 1', time: '2 hours ago' },
+        { name: 'src/utils', type: 'folder', changes: 'Member 2', time: '5 hours ago' },
+        { name: 'package.json', type: 'file', changes: 'Member 1', time: '2 hours ago' },
+        { name: 'README.md', type: 'file', changes: 'Member 2', time: '5 hours ago' }
+      ],
+      
+      // Discussions
+      discussions: project.discussions || [
+        {
+          user: 'Developer123',
+          time: '3 days ago',
+          content: 'This project looks great! Looking forward to collaborating.'
+        }
+      ],
+      
+      // Checkout status
+      isCheckedOut: project.isCheckedOut || false,
+      isFavorite: project.isFavorite || false
+    };
+
+    console.log('Debug: Formatted project:', formattedProject);
+    res.json(formattedProject);
+  } catch (error) {
+    console.error('Debug: Error fetching project:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 module.exports = router;
