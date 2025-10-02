@@ -433,4 +433,115 @@ router.get('/user-checkouts/:userId', authenticateUser, async (req, res) => {
     }
 });
 
+// PUT /api/projects/:projectId - Update a project
+router.put('/:projectId', authenticateUser, async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const { name, description, type, tags } = req.body;
+        const userId = req.user._id;
+
+        const projectsCollection = viewDocDB.getCollection('projects');
+
+        // Check if project exists and user owns it
+        const project = await projectsCollection.findOne({
+            _id: new ObjectId(projectId),
+            userId: new ObjectId(userId)
+        });
+
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found or you do not have permission to edit it'
+            });
+        }
+
+        // Update project
+        const updateData = {
+            name,
+            description,
+            type,
+            tags: tags || [],
+            updatedAt: new Date()
+        };
+
+        await projectsCollection.updateOne(
+            { _id: new ObjectId(projectId) },
+            { $set: updateData }
+        );
+
+        // Create activity
+        const activitiesCollection = viewDocDB.getCollection('activities');
+        await activitiesCollection.insertOne({
+            userId: new ObjectId(userId),
+            type: 'project_updated',
+            title: 'Project Updated',
+            description: `Updated project: ${name}`,
+            date: new Date(),
+            projectId: new ObjectId(projectId)
+        });
+
+        res.json({
+            success: true,
+            message: 'Project updated successfully',
+            project: { ...project, ...updateData }
+        });
+
+    } catch (error) {
+        console.error('Error updating project:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update project'
+        });
+    }
+});
+
+// DELETE /api/projects/:projectId - Delete a project
+router.delete('/:projectId', authenticateUser, async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        const userId = req.user._id;
+
+        const projectsCollection = viewDocDB.getCollection('projects');
+
+        // Check if project exists and user owns it
+        const project = await projectsCollection.findOne({
+            _id: new ObjectId(projectId),
+            userId: new ObjectId(userId)
+        });
+
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found or you do not have permission to delete it'
+            });
+        }
+
+        // Delete project
+        await projectsCollection.deleteOne({ _id: new ObjectId(projectId) });
+
+        // Create activity
+        const activitiesCollection = viewDocDB.getCollection('activities');
+        await activitiesCollection.insertOne({
+            userId: new ObjectId(userId),
+            type: 'project_deleted',
+            title: 'Project Deleted',
+            description: `Deleted project: ${project.name}`,
+            date: new Date(),
+            projectId: new ObjectId(projectId)
+        });
+
+        res.json({
+            success: true,
+            message: 'Project deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete project'
+        });
+    }
+});
+
 module.exports = router;
