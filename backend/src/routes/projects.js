@@ -1018,4 +1018,168 @@ router.get('/debug/:id', authenticateUser, async (req, res) => {
   }
 });
 
+// In projects.js - ADD THESE NEW ROUTES FOR MESSAGES
+
+// POST /api/projects/:projectId/checkin-message - Add check-in message
+router.post('/:projectId/checkin-message', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { message } = req.body;
+    const userId = req.user._id;
+    const userName = req.user.name || req.user.username;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message is required'
+      });
+    }
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    // Check if project exists
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Create message object
+    const newMessage = {
+      user: userName,
+      message: message,
+      time: new Date().toISOString(),
+      type: 'checkin',
+      createdAt: new Date()
+    };
+
+    // Add message to project's messages array
+    await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $push: { 
+          messages: newMessage 
+        },
+        $set: {
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    // Create activity for the message
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'project_message_added',
+      title: 'Check-in Message Added',
+      description: `Added check-in message to project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        messageType: 'checkin'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Check-in message added successfully',
+      newMessage: newMessage
+    });
+
+  } catch (error) {
+    console.error('Error adding check-in message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add check-in message'
+    });
+  }
+});
+
+// POST /api/projects/:projectId/checkout-message - Add check-out message
+router.post('/:projectId/checkout-message', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { message } = req.body;
+    const userId = req.user._id;
+    const userName = req.user.name || req.user.username;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message is required'
+      });
+    }
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    // Check if project exists
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Create message object
+    const newMessage = {
+      user: userName,
+      message: message,
+      time: new Date().toISOString(),
+      type: 'checkout',
+      createdAt: new Date()
+    };
+
+    // Add message to project's checkoutMessages array
+    await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $push: { 
+          checkoutMessages: newMessage 
+        },
+        $set: {
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    // Create activity for the message
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'project_message_added',
+      title: 'Check-out Message Added',
+      description: `Added check-out message to project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        messageType: 'checkout'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Check-out message added successfully',
+      newMessage: newMessage
+    });
+
+  } catch (error) {
+    console.error('Error adding check-out message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add check-out message'
+    });
+  }
+});
+
 module.exports = router;

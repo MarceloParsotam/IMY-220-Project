@@ -82,13 +82,20 @@ const ProjectDetail = () => {
 
   // Update all functions to use projectId instead of id
   const handleAddMessage = async (message, type) => {
-    if (!project || !currentUser) return;
+    if (!project || !currentUser || !message.trim()) {
+      setError('Message cannot be empty');
+      return;
+    }
 
     try {
       const token = getToken();
+      
+      // Use the correct endpoints for messages
       const endpoint = type === 'checkin' 
-        ? `http://localhost:3000/api/projects/${projectId}/checkin`
-        : `http://localhost:3000/api/projects/${projectId}/checkout`;
+        ? `http://localhost:3000/api/projects/${projectId}/checkin-message`
+        : `http://localhost:3000/api/projects/${projectId}/checkout-message`;
+
+      console.log('Adding message to endpoint:', endpoint);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -96,18 +103,23 @@ const ProjectDetail = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message: message.trim() })
       });
 
-      if (response.ok) {
-        await fetchProjectData(projectId);
-      } else {
-        console.error('Failed to add message');
-        setError('Failed to add message');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to add ${type} message`);
       }
+
+      const result = await response.json();
+      console.log('Message added successfully:', result);
+      
+      // Refresh project data to get updated messages
+      await fetchProjectData(projectId);
+      
     } catch (error) {
-      console.error('Error adding message:', error);
-      setError('Error adding message');
+      console.error(`Error adding ${type} message:`, error);
+      setError(error.message || `Failed to add ${type} message`);
     }
   };
 
