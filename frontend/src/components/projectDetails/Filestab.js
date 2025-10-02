@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
-const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject }) => {
+const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projectName = "project" }) => {
   const [currentPath, setCurrentPath] = useState('');
   const [showAddFileModal, setShowAddFileModal] = useState(false);
   const [newFileName, setNewFileName] = useState('');
@@ -9,6 +11,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject }) => {
   const [creatingType, setCreatingType] = useState('file');
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState('');
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
   const getFilesInCurrentPath = () => {
     return files.filter(file => {
@@ -83,6 +86,71 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadProjectAsZip = async () => {
+    setIsDownloadingZip(true);
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+      
+      const zip = new JSZip();
+      
+      // Helper function to add files to zip recursively
+      const addFilesToZip = async (fileList, currentPath = '') => {
+        for (const file of fileList) {
+          if (file.type === 'folder') {
+            // Create folder in zip
+            const folder = zip.folder(file.name);
+            
+            // For simplicity, we'll just create an empty folder
+            // In a real implementation, you might want to fetch nested files
+            folder.file('.gitkeep', ''); // Add empty file to ensure folder is created
+          } else {
+            // Fetch file content and add to zip
+            try {
+              const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/content`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  fileName: file.name,
+                  path: currentPath
+                })
+              });
+
+              if (response.ok) {
+                const fileData = await response.json();
+                const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                zip.file(filePath, fileData.content || '');
+              }
+            } catch (error) {
+              console.error(`Error fetching file ${file.name}:`, error);
+              // Add empty file if we can't fetch content
+              const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+              zip.file(filePath, `// Unable to load content for ${file.name}`);
+            }
+          }
+        }
+      };
+
+      // Add all files to the zip
+      await addFilesToZip(files);
+      
+      // Generate the zip file
+      const zipContent = await zip.generateAsync({ type: 'blob' });
+      
+      // Download the zip file
+      saveAs(zipContent, `${projectName}-${projectId}.zip`);
+      
+    } catch (error) {
+      console.error('Error creating project zip:', error);
+      alert('Error downloading project as ZIP. Please try again.');
+    } finally {
+      setIsDownloadingZip(false);
+    }
+  };
+
   const handleAddFile = async (e) => {
     e.preventDefault();
     if (!newFileName.trim()) return;
@@ -139,17 +207,42 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject }) => {
     <section className="project-section">
       <div className="files-header">
         <h2 className="section-title">Files</h2>
-        {currentUser && (
+        <div className="files-actions">
+          {currentUser && (
+            <button 
+              className="add-file-btn"
+              onClick={() => {
+                setCreatingType('file');
+                setShowAddFileModal(true);
+              }}
+            >
+              Add File
+            </button>
+          )}
           <button 
-            className="add-file-btn"
-            onClick={() => {
-              setCreatingType('file');
-              setShowAddFileModal(true);
-            }}
+            className="download-project-btn"
+            onClick={handleDownloadProjectAsZip}
+            disabled={isDownloadingZip || files.length === 0}
           >
-            Add File
+            {isDownloadingZip ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spinner">
+                  <path d="M21 12a9 9 0 11-6.219-8.56" />
+                </svg>
+                Packaging...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+                Download Project as ZIP
+              </>
+            )}
           </button>
-        )}
+        </div>
       </div>
 
       {/* Breadcrumbs */}
