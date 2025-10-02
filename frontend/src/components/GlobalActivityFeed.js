@@ -23,18 +23,6 @@ const GlobalActivityFeed = ({ messages }) => {
           </div>
           
           <p className="message-content">{message.content}</p>
-          
-          <div className="message-actions">
-            <button className="message-action-btn">
-              <span className="action-icon">👍</span> {message.likes}
-            </button>
-            <button className="message-action-btn">
-              <span className="action-icon">💬</span> {message.comments}
-            </button>
-            <button className="message-action-btn">
-              <span className="action-icon">🔗</span> Share
-            </button>
-          </div>
         </div>
       ))}
     </div>
