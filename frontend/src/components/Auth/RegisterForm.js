@@ -16,7 +16,7 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
   const [fieldErrors, setFieldErrors] = useState({});
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth(); // Changed from login to register
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -97,8 +97,8 @@ const RegisterForm = ({ switchToLogin, isActive }) => {
       const data = await response.json();
 
       if (data.success) {
-        // Use AuthContext to handle login
-        login(data.user, data.token);
+        // FIX: Use register function instead of login, and remove token parameter
+        register(data.user); // Remove the second parameter
         console.log('Registration successful, auth context updated');
         
         window.location.href = '/home';

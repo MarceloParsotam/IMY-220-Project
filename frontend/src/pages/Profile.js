@@ -12,7 +12,7 @@ import CreateProject from '../components/profile/CreateProject';
 
 const Profile = () => {
   const { userId } = useParams();
-  const { currentUser } = useAuth();
+  const { currentUser, updateUser } = useAuth(); // ADD: import updateUser
   const [isEditing, setIsEditing] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [user, setUser] = useState(null);
@@ -77,13 +77,15 @@ const Profile = () => {
       fetchUserData();
     }
   }, [userId]);
-const handleAvatarUpdate = (newAvatarUrl) => {
-  setUser(prevUser => ({
-    ...prevUser,
-    avatar: newAvatarUrl,
-    avatars: [newAvatarUrl] // Update the avatars array too
-  }));
-};
+
+  const handleAvatarUpdate = (newAvatarUrl) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      avatar: newAvatarUrl,
+      avatars: [newAvatarUrl] // Update the avatars array too
+    }));
+  };
+
   const handleSaveProfile = async (updatedData) => {
     try {
       const token = getToken();
@@ -109,13 +111,20 @@ const handleAvatarUpdate = (newAvatarUrl) => {
       const result = await response.json();
       
       // Update local state with the updated user data
-      setUser(prevUser => ({
-        ...prevUser,
-        name: `${updatedData.name || ''} ${updatedData.surname || ''}`.trim() || prevUser.username,
+      const updatedUserData = {
+        ...user,
+        name: `${updatedData.name || ''} ${updatedData.surname || ''}`.trim() || user.username,
         description: updatedData.description,
         about: updatedData.about,
         skills: updatedData.skills
-      }));
+      };
+      
+      setUser(updatedUserData);
+
+      // ADD: Update AuthContext if it's the current user's profile
+      if (isOwnProfile) {
+        updateUser(result.user); // Update the user in AuthContext
+      }
 
       setIsEditing(false);
     } catch (error) {

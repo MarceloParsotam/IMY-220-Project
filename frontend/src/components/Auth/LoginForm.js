@@ -48,8 +48,8 @@ const LoginForm = ({ switchToRegister, isActive }) => {
       console.log('Login response data:', data);
 
       if (data.success) {
-        // Use AuthContext to handle login
-        login(data.user, data.token);
+        // FIX: AuthContext login only takes userData, not token
+        login(data.user); // Remove the second parameter
         console.log('Login successful, auth context updated');
         
         // Force a hard navigation to ensure the app reloads with auth state
