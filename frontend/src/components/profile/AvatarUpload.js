@@ -166,12 +166,12 @@ const AvatarUpload = ({ user, onAvatarUpdate, isOwnProfile }) => {
               </div>
             ) : isDragOver ? (
               <div className="drag-drop-indicator">
-                <div className="drop-icon">⬇️</div>
+                <div className="drop-icon"></div>
                 <span>Drop to upload</span>
               </div>
             ) : (
               <div className="upload-indicator">
-                <div className="upload-icon">📷</div>
+                <div className="upload-icon"></div>
                 <span>Click or drag & drop</span>
               </div>
             )}
@@ -189,7 +189,7 @@ const AvatarUpload = ({ user, onAvatarUpdate, isOwnProfile }) => {
 
       {uploadError && (
         <div className="upload-error">
-          ⚠️ {uploadError}
+          {uploadError}
         </div>
       )}
 
