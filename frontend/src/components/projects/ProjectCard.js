@@ -1,3 +1,4 @@
+// ProjectCard.js - UPDATED TO USE DATABASE IMAGES
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,6 +11,7 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
   const [loading, setLoading] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
   const { currentUser } = useAuth();
 
   // Get token from localStorage
@@ -17,6 +19,51 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
     const userData = JSON.parse(localStorage.getItem('user'));
     return userData?._id || userData?.id || '';
   };
+
+  // Load image from database
+  useEffect(() => {
+    const loadProjectImage = async () => {
+      if (project.image) {
+        // If image is stored as Base64 in the project data (from all projects endpoint)
+        if (project.image.data) {
+          const dataUrl = `data:${project.image.contentType};base64,${project.image.data}`;
+          setImageUrl(dataUrl);
+        }
+      } else if (project.imageUrl) {
+        // If using file system storage (backward compatibility)
+        setImageUrl(`http://localhost:3000${project.imageUrl}`);
+      } else {
+        // Try to fetch image from API
+        try {
+          const token = getToken();
+          const response = await fetch(`http://localhost:3000/api/projects/${project.id}/image`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            setImageUrl(url);
+          }
+        } catch (error) {
+          console.log('No project image available');
+        }
+      }
+    };
+
+    loadProjectImage();
+  }, [project.id, project.image, project.imageUrl]);
+
+  // Clean up object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (imageUrl && imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
 
   // Fetch current checkout status
   const fetchCheckoutStatus = async () => {
@@ -203,11 +250,26 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
   return (
     <>
       <div className="project-card message-card">
+        {/* Project Image Display from Database */}
+        {imageUrl && (
+          <div className="project-image-container">
+            <img 
+              src={imageUrl} 
+              alt={project.name}
+              className="project-image"
+              onError={(e) => {
+                // If image fails to load, hide the container
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+        
         <div className="project-header">
           <div className="project-title-section">
             <h3 className="project-title">{project.name}</h3>
             <div className="project-type">{project.type}</div>
-            {!isOwnedByUser && (
+            {!project.isOwnedByUser && (
               <div className="project-owner">
                 <small>By {project.currentCheckout?.userName || 'Another User'}</small>
               </div>

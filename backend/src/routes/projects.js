@@ -3,7 +3,47 @@ const router = express.Router();
 const { ObjectId } = require('mongodb');
 const viewDocDB = require('../viewDocDB');
 const { authenticateUser } = require('../middleware/auth');
+// Add at the top of your projects.js file
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'uploads/projects/';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accept images only for projectImage
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
+
+// Use .any() to accept any field names, or be more specific
+const handleUpload = upload.any(); 
 // GET /api/projects/all - Get all public projects and user's projects
 // GET /api/projects/all - Get all public projects and user's projects
 router.get('/all', authenticateUser, async (req, res) => {
@@ -52,6 +92,12 @@ router.get('/all', authenticateUser, async (req, res) => {
                     updatedAt: project.updatedAt,
                     status: project.status || 'active',
                     userId: project.userId,
+                    image: project.image ? {
+                        data: project.image.data,
+                        contentType: project.image.contentType,
+                        filename: project.image.filename
+                    } : null,
+                    imageUrl: project.imageUrl,
                     // Checkout information
                     isCheckedOut: !!activeCheckout,
                     currentCheckout: activeCheckout ? {
@@ -83,13 +129,21 @@ router.get('/all', authenticateUser, async (req, res) => {
         });
     }
 });
-// POST /api/projects - Create new project
-router.post('/', authenticateUser, async (req, res) => {
+// In projects.js - UPDATE THE POST ROUTE
+router.post('/', authenticateUser, upload.single('projectImage'), async (req, res) => {
     try {
-        const { name, description, type, tags, isPublic } = req.body;
+        console.log('Project creation request received');
+        console.log('Request body:', req.body);
+
+        let { name, description, type, tags, isPublic } = req.body;
         const userId = req.user._id;
 
+        // Validate required fields
         if (!name || !description) {
+            // Clean up uploaded file if validation fails
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             return res.status(400).json({
                 success: false,
                 message: 'Project name and description are required'
@@ -98,21 +152,65 @@ router.post('/', authenticateUser, async (req, res) => {
 
         const projectsCollection = viewDocDB.getCollection('projects');
 
+        // Handle tags
+        let parsedTags = [];
+        if (tags) {
+            try {
+                parsedTags = JSON.parse(tags);
+            } catch (e) {
+                console.warn('Failed to parse tags, using empty array');
+            }
+        }
+
+        // Handle project image - STORE IN DATABASE AS BASE64
+        let imageData = null;
+        if (req.file) {
+            try {
+                // Read the image file and convert to Base64
+                const imageBuffer = fs.readFileSync(req.file.path);
+                const base64Image = imageBuffer.toString('base64');
+                
+                // Store image data in database
+                imageData = {
+                    data: base64Image,
+                    contentType: req.file.mimetype,
+                    filename: req.file.originalname,
+                    size: req.file.size
+                };
+                
+                console.log('Image stored in database, size:', req.file.size, 'bytes');
+                
+                // Delete the temporary file since we stored it in DB
+                fs.unlinkSync(req.file.path);
+                
+            } catch (imageError) {
+                console.error('Error processing image:', imageError);
+                // Clean up file if error
+                if (fs.existsSync(req.file.path)) {
+                    fs.unlinkSync(req.file.path);
+                }
+            }
+        }
+
         const newProject = {
-            name,
-            description,
+            name: name.trim(),
+            description: description.trim(),
             type: type || 'Web Application',
-            tags: tags || [],
-            isPublic: isPublic !== undefined ? isPublic : true,
+            tags: parsedTags,
+            isPublic: isPublic !== undefined ? (isPublic === 'true' || isPublic === true) : true,
             userId: new ObjectId(userId),
             createdAt: new Date(),
             updatedAt: new Date(),
-            status: 'active'
+            status: 'active',
+            image: imageData, // Store image data in database
+            version: '1.0.0'
         };
+
+        console.log('Creating project with image data:', !!imageData);
 
         const result = await projectsCollection.insertOne(newProject);
 
-        // Create activity for the new project
+        // Create activity
         try {
             const activitiesCollection = viewDocDB.getCollection('activities');
             await activitiesCollection.insertOne({
@@ -121,7 +219,10 @@ router.post('/', authenticateUser, async (req, res) => {
                 title: 'Created New Project',
                 description: `Created project: ${name}`,
                 date: new Date(),
-                projectId: result.insertedId
+                projectId: result.insertedId,
+                metadata: {
+                    hasImage: !!imageData
+                }
             });
         } catch (activityError) {
             console.log('Could not create activity record:', activityError);
@@ -137,13 +238,59 @@ router.post('/', authenticateUser, async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating project:', error);
+        // Clean up uploaded file if error occurs
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
         res.status(500).json({
             success: false,
-            message: 'Failed to create project'
+            message: 'Failed to create project',
+            error: error.message
         });
     }
 });
+// In projects.js - ADD IMAGE SERVING ROUTE
+// GET /api/projects/:id/image - Get project image from database
+router.get('/:id/image', authenticateUser, async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        const projectsCollection = viewDocDB.getCollection('projects');
+        
+        // Get the project with image data
+        const project = await projectsCollection.findOne({
+            _id: new ObjectId(projectId)
+        }, {
+            projection: { image: 1 }
+        });
+        
+        if (!project || !project.image || !project.image.data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project image not found'
+            });
+        }
 
+        // Convert Base64 back to buffer
+        const imageBuffer = Buffer.from(project.image.data, 'base64');
+        
+        // Set appropriate headers
+        res.set({
+            'Content-Type': project.image.contentType,
+            'Content-Length': imageBuffer.length,
+            'Cache-Control': 'public, max-age=86400' // Cache for 24 hours
+        });
+        
+        // Send the image data
+        res.send(imageBuffer);
+        
+    } catch (error) {
+        console.error('Error serving project image:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to load project image'
+        });
+    }
+});
 // GET /api/projects/user/:userId - Get user's projects with checkout status
 router.get('/user/:userId', authenticateUser, async (req, res) => {
     try {

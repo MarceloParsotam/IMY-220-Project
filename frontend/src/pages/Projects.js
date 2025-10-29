@@ -130,40 +130,59 @@ useEffect(() => {
   setFilteredProjects(filtered);
 }, [projects, activeCategory, activeTab, searchQuery, filterType, currentUser]);
 
-  // Handle project creation
-  const handleCreateProject = async (projectData) => {
-    try {
-      const token = getToken();
-      const userId = currentUser._id || currentUser.id;
+  // In Projects.js - handleCreateProject function
+const handleCreateProject = async (formData) => {
+  try {
+    const token = getToken();
+    const userId = currentUser._id || currentUser.id;
 
-      const response = await fetch('http://localhost:3000/api/projects', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: projectData.projectName,
-          description: projectData.projectDescription,
-          type: projectData.projectType,
-          tags: projectData.tags || [],
-          isPublic: true
-        })
-      });
-
-      if (response.ok) {
-        await fetchUserProjects(); // Refresh the projects list
-        setIsModalOpen(false);
-        alert('Project created successfully!');
-      } else {
-        const error = await response.json();
-        alert(error.message || 'Failed to create project');
-      }
-    } catch (error) {
-      console.error('Error creating project:', error);
-      alert('Failed to create project');
+    // Debug: Log FormData contents
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
     }
-  };
+
+    // Make sure userId is added
+    formData.append('userId', userId);
+
+    const response = await fetch('http://localhost:3000/api/projects', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Don't set Content-Type - let browser set it with boundary
+      },
+      body: formData
+    });
+
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+
+    if (response.ok) {
+      let projectData;
+      try {
+        projectData = JSON.parse(responseText);
+        console.log('Project created successfully:', projectData);
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', e);
+      }
+      await fetchAllProjects();
+      setIsModalOpen(false);
+      alert('Project created successfully!');
+    } else {
+      let errorMessage = `Error: ${response.status}`;
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = `${errorMessage} - ${responseText}`;
+      }
+      alert(errorMessage);
+    }
+  } catch (error) {
+    console.error('Error creating project:', error);
+    alert(`Network error: ${error.message}`);
+  }
+};
 
   // Handle checkout updates
   const handleCheckoutUpdate = (projectId, isCheckedOut, checkoutData) => {
