@@ -4,20 +4,166 @@ const { ObjectId } = require('mongodb');
 const viewDocDB = require('../viewDocDB');
 const { authenticateUser } = require('../middleware/auth');
 
+// GET /api/activities - Get activities for feed (FIXED VERSION)
+router.get('/', authenticateUser, async (req, res) => {
+    try {
+        const { filter = 'all', limit = 20 } = req.query;
+        const currentUserId = req.user._id;
+
+        const activitiesCollection = viewDocDB.getCollection('activities');
+        const usersCollection = viewDocDB.getCollection('users');
+        
+        console.log('🔍 Current user ID:', currentUserId);
+        console.log('🔍 Filter:', filter);
+
+        // Get current user's friends list
+        const currentUser = await usersCollection.findOne(
+            { _id: new ObjectId(currentUserId) },
+            { projection: { friends: 1 } }
+        );
+
+        const userFriends = currentUser?.friends || [];
+        console.log('🔍 User friends count:', userFriends.length);
+
+        // Build query based on friendship logic
+        let userQuery = {};
+        
+        switch (filter) {
+            case 'local':
+                // Show activities from FRIENDS only
+                userQuery = { 
+                    userId: { 
+                        $in: [
+                            new ObjectId(currentUserId), // Include own activities
+                            ...userFriends.map(friendId => new ObjectId(friendId))
+                        ]
+                    } 
+                };
+                console.log('🔍 Local query - friends & own activities only');
+                break;
+                
+            case 'global':
+                // Show activities from NON-FRIENDS only (exclude self and friends)
+                userQuery = { 
+                    userId: { 
+                        $not: { 
+                            $in: [
+                                new ObjectId(currentUserId),
+                                ...userFriends.map(friendId => new ObjectId(friendId))
+                            ]
+                        }
+                    } 
+                };
+                console.log('🔍 Global query - non-friends only');
+                break;
+                
+            case 'all':
+            default:
+                // Show activities from EVERYONE
+                console.log('🔍 All activities - everyone');
+                break;
+        }
+
+        const activities = await activitiesCollection
+            .find(userQuery)
+            .sort({ date: -1 }) // Reverse chronological order
+            .limit(parseInt(limit))
+            .toArray();
+
+        console.log('🔍 Found activities:', activities.length);
+
+        // Get user details for all activity authors
+        const userIds = [...new Set(activities.map(activity => activity.userId))];
+        const userObjectIds = userIds.map(id => {
+            try {
+                return new ObjectId(id);
+            } catch (error) {
+                console.error('Invalid ObjectId:', id);
+                return null;
+            }
+        }).filter(id => id !== null);
+
+        const users = await usersCollection
+            .find({ _id: { $in: userObjectIds } })
+            .project({ username: 1, name: 1, surname: 1, email: 1, avatar: 1 })
+            .toArray();
+        
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user._id.toString()] = {
+                username: user.username,
+                name: `${user.name || ''} ${user.surname || ''}`.trim() || user.username,
+                email: user.email,
+                avatar: user.avatar
+            };
+        });
+
+        // Format activities with friendship-based types
+        const formattedActivities = activities.map(activity => {
+            const activityUserId = activity.userId.toString();
+            const isCurrentUser = activityUserId === currentUserId;
+            const isFriend = userFriends.some(friendId => friendId.toString() === activityUserId);
+            
+            // Determine activity type based on friendship
+            let activityType = 'global'; // Default to global
+            if (isCurrentUser || isFriend) {
+                activityType = 'local';
+            }
+
+            return {
+                id: activity._id.toString(),
+                type: activityType,
+                title: activity.title,
+                content: activity.description,
+                author: userMap[activityUserId]?.name || 'Unknown User',
+                username: userMap[activityUserId]?.username,
+                avatar: userMap[activityUserId]?.avatar,
+                timestamp: formatRelativeTime(activity.date),
+                projectId: activity.projectId ? activity.projectId.toString() : null,
+                isCurrentUser: isCurrentUser,
+                isFriend: isFriend,
+                likes: Math.floor(Math.random() * 50),
+                comments: Math.floor(Math.random() * 10)
+            };
+        });
+
+        console.log('✅ Sending activities:', formattedActivities.length);
+        console.log('✅ Activity breakdown:', {
+            local: formattedActivities.filter(a => a.type === 'local').length,
+            global: formattedActivities.filter(a => a.type === 'global').length,
+            own: formattedActivities.filter(a => a.isCurrentUser).length,
+            friends: formattedActivities.filter(a => a.isFriend && !a.isCurrentUser).length,
+            strangers: formattedActivities.filter(a => !a.isFriend && !a.isCurrentUser).length
+        });
+
+        res.json({
+            success: true,
+            activities: formattedActivities
+        });
+    } catch (error) {
+        console.error('Error fetching activities:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch activities'
+        });
+    }
+});
+
 // POST /api/activities - Create new activity
 router.post('/', authenticateUser, async (req, res) => {
     try {
-        const { title, description, type } = req.body;
+        const { title, description, type, projectId } = req.body;
         const userId = req.user._id;
 
         const activitiesCollection = viewDocDB.getCollection('activities');
 
         const newActivity = {
-            userId: new ObjectId(userId),
+            userId: userId,
             title,
             description,
             type: type || 'general',
-            date: new Date()
+            date: new Date(),
+            projectId: projectId || null
         };
 
         const result = await activitiesCollection.insertOne(newActivity);
@@ -39,7 +185,7 @@ router.post('/', authenticateUser, async (req, res) => {
     }
 });
 
-// POST /api/checkins - Create new checkin
+// POST /api/activities/checkins - Create new checkin
 router.post('/checkins', authenticateUser, async (req, res) => {
     try {
         const { location, notes, projectId } = req.body;
@@ -74,127 +220,6 @@ router.post('/checkins', authenticateUser, async (req, res) => {
     }
 });
 
-// GET /api/activities - Get activities for feed
-router.get('/', authenticateUser, async (req, res) => {
-    try {
-        const { filter = 'all', limit = 20 } = req.query;
-        const currentUserId = req.user._id;
-
-        const activitiesCollection = viewDocDB.getCollection('activities');
-        const usersCollection = viewDocDB.getCollection('users');
-        
-        //console.log('🔍 Current user ID:', currentUserId);
-        //console.log('🔍 Filter:', filter);
-
-        // Define which activity types are local vs global
-        // LOCAL: Personal user actions (check-ins, favorites, etc.)
-        const localActivityTypes = [
-            'project_checked_in', 
-            'project_checked_out', 
-            'project_favorited',
-            'code_commit',
-            'bug_fix',
-            'documentation'
-        ];
-        
-        // GLOBAL: Public announcements, system updates, major milestones
-        const globalActivityTypes = [
-            'project_completed',
-            'milestone', 
-            'collaboration',
-            'announcement',
-            'system_update',
-            'performance',
-            'new_feature'
-        ];
-
-        // Build query based on filter
-        let query = {};
-        
-        switch (filter) {
-            case 'local':
-                // Only show personal activity types
-                query.type = { $in: localActivityTypes };
-                //console.log('🔍 Local query - personal actions only');
-                break;
-            case 'global':
-                // Only show global/public activity types  
-                query.type = { $in: globalActivityTypes };
-                //console.log('🔍 Global query - public announcements only');
-                break;
-            case 'all':
-            default:
-                // Show all activity types
-                //console.log('🔍 All activities - all types');
-                break;
-        }
-
-        const activities = await activitiesCollection
-            .find(query)
-            .sort({ date: -1 })
-            .limit(parseInt(limit))
-            .toArray();
-
-        //console.log('🔍 Found activities:', activities.length);
-
-        // Get usernames
-        const userIds = [...new Set(activities.map(activity => activity.userId))];
-        const userObjectIds = userIds.map(id => {
-            try {
-                return new ObjectId(id);
-            } catch (error) {
-                console.error('Invalid ObjectId:', id);
-                return null;
-            }
-        }).filter(id => id !== null);
-
-        const users = await usersCollection
-            .find({ _id: { $in: userObjectIds } })
-            .toArray();
-        
-        const userMap = {};
-        users.forEach(user => {
-            userMap[user._id.toString()] = user.username || user.email;
-        });
-
-        // Format activities
-        const formattedActivities = activities.map(activity => {
-            const isLocalType = localActivityTypes.includes(activity.type);
-            const activityType = isLocalType ? 'local' : 'global';
-
-            return {
-                id: activity._id.toString(),
-                type: activityType,
-                title: activity.title,
-                content: activity.description,
-                author: userMap[activity.userId] || 'Unknown User',
-                timestamp: formatRelativeTime(activity.date),
-                projectId: activity.projectId ? activity.projectId.toString() : null,
-                likes: Math.floor(Math.random() * 50),
-                comments: Math.floor(Math.random() * 10),
-                isCurrentUser: activity.userId === currentUserId
-            };
-        });
-
-        //console.log('✅ Sending activities:', formattedActivities.length);
-        //console.log('✅ Activity breakdown:', {
-        //     local: formattedActivities.filter(a => a.type === 'local').length,
-        //     global: formattedActivities.filter(a => a.type === 'global').length
-        // });
-
-        res.json({
-            success: true,
-            activities: formattedActivities
-        });
-    } catch (error) {
-        //console.error('Error fetching activities:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch activities'
-        });
-    }
-});
-
 // Helper function to format relative time
 function formatRelativeTime(date) {
     const now = new Date();
@@ -209,41 +234,5 @@ function formatRelativeTime(date) {
     if (diffDays === 1) return '1 day ago';
     return `${diffDays} days ago`;
 }
-
-// POST /api/activities - Create new activity
-router.post('/', authenticateUser, async (req, res) => {
-    try {
-        const { title, description, type, projectId } = req.body;
-        const userId = req.user._id;
-
-        const activitiesCollection = viewDocDB.getCollection('activities');
-
-        const newActivity = {
-            userId: userId, // Store as string
-            title,
-            description,
-            type: type || 'general',
-            date: new Date(),
-            projectId: projectId || null
-        };
-
-        const result = await activitiesCollection.insertOne(newActivity);
-
-        res.status(201).json({
-            success: true,
-            message: 'Activity created successfully',
-            activity: {
-                _id: result.insertedId,
-                ...newActivity
-            }
-        });
-    } catch (error) {
-        console.error('Error creating activity:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to create activity'
-        });
-    }
-});
 
 module.exports = router;
