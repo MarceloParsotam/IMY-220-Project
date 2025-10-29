@@ -1,6 +1,7 @@
 import React from 'react';
+import { useEffect } from 'react';
 
-const GlobalActivityFeed = ({ messages }) => {
+const GlobalActivityFeed = ({ messages, onHashtagClick }) => {
   if (!messages || messages.length === 0) {
     return (
       <div className="empty-state">
@@ -8,6 +9,19 @@ const GlobalActivityFeed = ({ messages }) => {
       </div>
     );
   }
+   useEffect(() => {
+    const handleHashtagClick = (e) => {
+      if (e.target.classList.contains('hashtag')) {
+        const hashtag = e.target.getAttribute('data-hashtag');
+        if (onHashtagClick) {
+          onHashtagClick(hashtag);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleHashtagClick);
+    return () => document.removeEventListener('click', handleHashtagClick);
+  }, [onHashtagClick]);
 
   return (
     <div className="global-feed">
