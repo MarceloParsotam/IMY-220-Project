@@ -12,12 +12,15 @@ import CreateProject from '../components/profile/CreateProject';
 
 const Profile = () => {
   const { userId } = useParams();
-  const { currentUser, updateUser } = useAuth(); // ADD: import updateUser
+  const { currentUser, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isFriend, setIsFriend] = useState(false);
+  const [friendshipStatus, setFriendshipStatus] = useState('unknown'); // 'friend', 'not-friend', 'pending', 'unknown'
+  const [isCheckingFriendship, setIsCheckingFriendship] = useState(true);
 
   // Get token from localStorage (user ID)
   const getToken = () => {
@@ -28,6 +31,47 @@ const Profile = () => {
   // Check if this is the current user's profile
   const isOwnProfile = currentUser && (currentUser._id === userId || currentUser.id === userId);
   
+  // Check friendship status
+  useEffect(() => {
+    const checkFriendshipStatus = async () => {
+      if (!currentUser || !userId || isOwnProfile) {
+        setIsFriend(true); // Always show full profile for own profile
+        setFriendshipStatus('friend');
+        setIsCheckingFriendship(false);
+        return;
+      }
+
+      try {
+        const token = getToken();
+        const currentUserId = currentUser._id || currentUser.id;
+        
+        const response = await fetch(`http://localhost:3000/api/friends/status/${userId}?currentUserId=${currentUserId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const statusData = await response.json();
+          setIsFriend(statusData.isFriend);
+          setFriendshipStatus(statusData.isFriend ? 'friend' : 'not-friend');
+        } else {
+          setIsFriend(false);
+          setFriendshipStatus('not-friend');
+        }
+      } catch (error) {
+        console.error('Error checking friendship status:', error);
+        setIsFriend(false);
+        setFriendshipStatus('not-friend');
+      } finally {
+        setIsCheckingFriendship(false);
+      }
+    };
+
+    checkFriendshipStatus();
+  }, [currentUser, userId, isOwnProfile]);
+
   // Fetch user data from API
   useEffect(() => {
     const fetchUserData = async () => {
@@ -121,7 +165,7 @@ const Profile = () => {
       
       setUser(updatedUserData);
 
-      // ADD: Update AuthContext if it's the current user's profile
+      // Update AuthContext if it's the current user's profile
       if (isOwnProfile) {
         updateUser(result.user); // Update the user in AuthContext
       }
@@ -182,7 +226,54 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
+  const handleSendFriendRequest = async () => {
+    try {
+      const token = getToken();
+      const currentUserId = currentUser._id || currentUser.id;
+      
+      const response = await fetch('http://localhost:3000/api/friends/request', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fromUserId: currentUserId,
+          toUserId: userId
+        })
+      });
+
+      if (response.ok) {
+        setFriendshipStatus('pending');
+        alert('Friend request sent!');
+      } else {
+        throw new Error('Failed to send friend request');
+      }
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      alert('Failed to send friend request');
+    }
+  };
+
+  // Limited profile view for non-friends
+  const LimitedProfileView = ({ userName, onSendRequest }) => (
+    <div className="limited-profile">
+      <div className="limited-content">
+        <div className="limited-message">
+          <h3>Connect with {userName}</h3>
+          <p>Send a friend request to view their full profile, projects, and activity</p>
+          <button className="primary-btn" onClick={onSendRequest}>
+            {friendshipStatus === 'pending' ? 'Friend Request Sent' : 'Send Friend Request'}
+          </button>
+          {friendshipStatus === 'pending' && (
+            <p className="pending-message">Waiting for {userName} to accept your friend request</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading || isCheckingFriendship) {
     return (
       <div className="profile-container">
         <div className="loading">Loading profile...</div>
@@ -226,16 +317,27 @@ const Profile = () => {
       )}
       
       <div className="profile-content">
-        <div className="profile-main">
-          <ProfileAbout about={user.about} />
-          <ProfileSkills skills={user.skills} />
-          <ProfileFriends friends={user.friends} />
-        </div>
-        
-        <div className="profile-sidebar">
-          <ProfileProjects projects={user.projects} />
-          <ProfileActivity activities={user.activities} />
-        </div>
+        {isOwnProfile || isFriend ? (
+          // Show full profile for friends and own profile
+          <>
+            <div className="profile-main">
+              <ProfileAbout about={user.about} />
+              <ProfileSkills skills={user.skills} />
+              <ProfileFriends friends={user.friends} />
+            </div>
+            
+            <div className="profile-sidebar">
+              <ProfileProjects projects={user.projects} />
+              <ProfileActivity activities={user.activities} />
+            </div>
+          </>
+        ) : (
+          // Show limited profile for non-friends
+          <LimitedProfileView 
+            userName={user.name} 
+            onSendRequest={handleSendFriendRequest}
+          />
+        )}
       </div>
 
       {isEditing && (

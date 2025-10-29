@@ -323,5 +323,63 @@ router.delete('/remove', authenticateUser, async (req, res) => {
     });
   }
 });
+// GET /api/friends/status/:userId - Check friendship status
+router.get('/status/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.query.currentUserId || req.user._id.toString();
+
+    // If checking own profile, always return as friend
+    if (userId === currentUserId) {
+      return res.json({
+        success: true,
+        isFriend: true,
+        status: 'own-profile'
+      });
+    }
+
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Check if users are friends
+    const currentUser = await usersCollection.findOne(
+      { _id: new ObjectId(currentUserId) },
+      { projection: { friends: 1, friendRequests: 1 } }
+    );
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'Current user not found'
+      });
+    }
+
+    const isFriend = currentUser.friends && 
+      currentUser.friends.some(friendId => friendId.equals(new ObjectId(userId)));
+
+    // Check if there's a pending request
+    const hasPendingRequest = currentUser.friendRequests && 
+      currentUser.friendRequests.some(requestId => requestId.equals(new ObjectId(userId)));
+
+    let status = 'not-friend';
+    if (isFriend) {
+      status = 'friend';
+    } else if (hasPendingRequest) {
+      status = 'pending';
+    }
+
+    res.json({
+      success: true,
+      isFriend: isFriend,
+      status: status
+    });
+
+  } catch (error) {
+    console.error('Error checking friendship status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check friendship status'
+    });
+  }
+});
 
 module.exports = router;
