@@ -1699,5 +1699,344 @@ router.post('/:projectId/discussion', authenticateUser, async (req, res) => {
     });
   }
 });
+// GET /api/projects/:projectId/members - Get project members (FINAL FIXED VERSION)
+router.get('/:projectId/members', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    console.log('Raw project members:', project.members);
+
+    // Handle both old format (array of strings) and new format (array of objects)
+    let members = [];
+    
+    if (project.members && Array.isArray(project.members)) {
+      members = project.members.map((member, index) => {
+        if (typeof member === 'string') {
+          // Old format: string (username or ID)
+          return { 
+            id: `string-${index}`, // Create a temporary ID for string members
+            name: member, 
+            username: member 
+          };
+        } else if (typeof member === 'object' && member !== null) {
+          // New format: object with properties
+          return {
+            id: member.id || member._id || `object-${index}`,
+            name: member.name || member.username || 'Unknown Member',
+            username: member.username || member.name || 'unknown'
+          };
+        }
+        return { 
+          id: `unknown-${index}`, 
+          name: 'Unknown Member', 
+          username: 'unknown' 
+        };
+      });
+    }
+
+    console.log('Processed members for frontend:', members);
+
+    res.json({
+      success: true,
+      members: members
+    });
+  } catch (error) {
+    console.error('Error fetching project members:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch project members'
+    });
+  }
+});
+
+// GET /api/projects/:projectId/available-friends - Get user's friends who are not project members
+router.get('/:projectId/available-friends', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const userId = req.user._id;
+    
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Get the project
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Get current user's friends from users collection
+    const currentUser = await usersCollection.findOne({
+      _id: new ObjectId(userId)
+    }, { projection: { friends: 1 } });
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'Current user not found'
+      });
+    }
+
+    console.log('Current user friends:', currentUser.friends);
+
+    // Get current project members
+    const currentMemberIds = (project.members || [])
+      .filter(memberId => memberId && ObjectId.isValid(memberId))
+      .map(id => id.toString());
+
+    // Add current user to member IDs (since owner is always a member)
+    currentMemberIds.push(userId.toString());
+
+    console.log('Current member IDs (including owner):', currentMemberIds);
+
+    // Get friends who are not already project members
+    const friendIds = (currentUser.friends || [])
+      .filter(friendId => friendId && ObjectId.isValid(friendId))
+      .map(id => id.toString())
+      .filter(friendId => !currentMemberIds.includes(friendId));
+
+    console.log('Available friend IDs:', friendIds);
+
+    const availableFriends = await usersCollection.find({
+      _id: { $in: friendIds.map(id => new ObjectId(id)) }
+    }).toArray();
+
+    const formattedFriends = availableFriends.map(friend => ({
+      id: friend._id.toString(),
+      name: friend.name || friend.username,
+      username: friend.username,
+      email: friend.email
+    }));
+
+    console.log('Formatted available friends:', formattedFriends.length);
+
+    res.json({
+      success: true,
+      friends: formattedFriends
+    });
+  } catch (error) {
+    console.error('Error fetching available friends:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch available friends'
+    });
+  }
+});
+
+// POST /api/projects/:projectId/members - Add member to project
+router.post('/:projectId/members', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { memberId } = req.body;
+    const userId = req.user._id;
+
+    // Validate memberId
+    if (!memberId || !ObjectId.isValid(memberId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid member ID'
+      });
+    }
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Check if project exists and user has permission
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId),
+      $or: [
+        { userId: new ObjectId(userId) },
+        { 'members': { $elemMatch: { id: userId.toString() } } }
+      ]
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found or no permission'
+      });
+    }
+
+    // Verify friendship using existing friends system
+    const currentUser = await usersCollection.findOne({
+      _id: new ObjectId(userId)
+    }, { projection: { friends: 1 } });
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'Current user not found'
+      });
+    }
+
+    const isFriend = currentUser.friends && 
+      currentUser.friends.some(friendId => friendId.toString() === memberId);
+
+    if (!isFriend) {
+      return res.status(400).json({
+        success: false,
+        message: 'You can only add friends to the project'
+      });
+    }
+
+    // Get member details to store name
+    const newMemberUser = await usersCollection.findOne({ 
+      _id: new ObjectId(memberId) 
+    }, { projection: { name: 1, username: 1 } });
+
+    if (!newMemberUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User to add not found'
+      });
+    }
+
+    // Create member object with name and ID
+    const newMember = {
+      id: memberId,
+      name: newMemberUser.name || newMemberUser.username,
+      username: newMemberUser.username
+    };
+
+    // Check if already a member
+    const currentMembers = project.members || [];
+    const isAlreadyMember = currentMembers.some(member => 
+      member.id === memberId
+    );
+
+    if (isAlreadyMember) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already a project member'
+      });
+    }
+
+    // Add member to project - store as object with name
+    await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $addToSet: { members: newMember },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'member_added',
+      title: 'Member Added to Project',
+      description: `Added ${newMemberUser.username} to project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        memberId: memberId,
+        memberName: newMemberUser.username
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Member added successfully',
+      member: newMember
+    });
+  } catch (error) {
+    console.error('Error adding member:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add member'
+    });
+  }
+});
+
+// DELETE /api/projects/:projectId/members/:memberId - Remove member from project
+router.delete('/:projectId/members/:memberId', authenticateUser, async (req, res) => {
+  try {
+    const { projectId, memberId } = req.params;
+    const userId = req.user._id;
+
+    // Validate memberId
+    if (!memberId || !ObjectId.isValid(memberId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid member ID'
+      });
+    }
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Check if project exists and user has permission (owner only)
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId),
+      userId: new ObjectId(userId) // Only owner can remove members
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found or no permission to remove members'
+      });
+    }
+
+    // Remove member from project using the member object structure
+    await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $pull: { members: { id: memberId } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    const removedMemberUser = await usersCollection.findOne({ _id: new ObjectId(memberId) });
+    
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: 'member_removed',
+      title: 'Member Removed from Project',
+      description: `Removed ${removedMemberUser?.username || 'user'} from project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        memberId: memberId,
+        memberName: removedMemberUser?.username
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Member removed successfully'
+    });
+  } catch (error) {
+    console.error('Error removing member:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove member'
+    });
+  }
+});
 
 module.exports = router;

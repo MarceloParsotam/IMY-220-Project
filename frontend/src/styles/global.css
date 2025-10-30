@@ -3729,7 +3729,7 @@ button {
 .discussion-input-section {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: var(--dark-gray);
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
@@ -3748,6 +3748,7 @@ button {
   font-size: 14px;
   resize: vertical;
   margin-bottom: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .discussion-textarea:focus {
@@ -4601,4 +4602,94 @@ button {
   width: 100%;
   height: 200px;
   object-fit: cover;
+}
+/* Members Tab Styles */
+.members-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-member-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-member-btn:hover {
+  background: #0056b3;
+}
+
+.members-table {
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  background: var(--primary-dark);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.member-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  align-items: center;
+}
+
+.member-row:last-child {
+  border-bottom: none;
+}
+
+.role-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.role-badge.owner {
+  background: #d4edda;
+  color: #155724;
+}
+
+.role-badge.member {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.remove-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.remove-btn:hover {
+  background: #c82333;
+}
+
+.no-members {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.help-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
 }
