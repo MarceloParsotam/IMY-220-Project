@@ -659,8 +659,8 @@ router.get('/user-checkouts/:userId', authenticateUser, async (req, res) => {
     }
 });
 
-// In projects.js - UPDATE the PUT /api/projects/:projectId route
-router.put('/:projectId', authenticateUser, async (req, res) => {
+// In projects.js - UPDATE the PUT route to handle image uploads
+router.put('/:projectId', authenticateUser, upload.single('projectImage'), async (req, res) => {
   try {
     const { projectId } = req.params;
     const { name, description, type, tags, version, technologies, members } = req.body;
@@ -675,28 +675,100 @@ router.put('/:projectId', authenticateUser, async (req, res) => {
     });
 
     if (!project) {
+      // Clean up uploaded file if validation fails
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
       return res.status(404).json({
         success: false,
         message: 'Project not found or you do not have permission to edit it'
       });
     }
 
-    // Update project with all fields
+    // Handle image upload if new image provided
+    let imageData = null;
+    if (req.file) {
+      try {
+        const imageBuffer = fs.readFileSync(req.file.path);
+        const base64Image = imageBuffer.toString('base64');
+        
+        imageData = {
+          data: base64Image,
+          contentType: req.file.mimetype,
+          filename: req.file.originalname,
+          size: req.file.size
+        };
+        
+        // Delete temporary file
+        fs.unlinkSync(req.file.path);
+        console.log('New project image uploaded and stored in database');
+      } catch (imageError) {
+        console.error('Error processing image:', imageError);
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      }
+    }
+
+    // Parse arrays from strings if needed
+    let parsedTags = [];
+    let parsedTechnologies = [];
+    let parsedMembers = [];
+
+    try {
+      if (tags) {
+        if (typeof tags === 'string') {
+          parsedTags = JSON.parse(tags);
+        } else {
+          parsedTags = tags;
+        }
+      }
+      if (technologies) {
+        if (typeof technologies === 'string') {
+          parsedTechnologies = JSON.parse(technologies);
+        } else {
+          parsedTechnologies = technologies;
+        }
+      }
+      if (members) {
+        if (typeof members === 'string') {
+          parsedMembers = JSON.parse(members);
+        } else {
+          parsedMembers = members;
+        }
+      }
+    } catch (parseError) {
+      console.warn('Failed to parse array fields, using empty arrays');
+    }
+
+    // Update project data
     const updateData = {
-      name,
-      description,
-      type: type || 'Web Application',
-      tags: tags || [],
-      version: version || 'v1.0.0',
-      technologies: technologies || [],
-      members: members || [],
+      name: name || project.name,
+      description: description || project.description,
+      type: type || project.type || 'Web Application',
+      tags: parsedTags.length > 0 ? parsedTags : project.tags || [],
+      version: version || project.version || 'v1.0.0',
+      technologies: parsedTechnologies.length > 0 ? parsedTechnologies : project.technologies || [],
+      members: parsedMembers.length > 0 ? parsedMembers : project.members || [],
       updatedAt: new Date()
     };
 
-    await projectsCollection.updateOne(
+    // Add image data if new image was uploaded
+    if (imageData) {
+      updateData.image = imageData;
+    }
+
+    const result = await projectsCollection.updateOne(
       { _id: new ObjectId(projectId) },
       { $set: updateData }
     );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No changes made to project'
+      });
+    }
 
     // Create activity
     const activitiesCollection = viewDocDB.getCollection('activities');
@@ -704,22 +776,35 @@ router.put('/:projectId', authenticateUser, async (req, res) => {
       userId: new ObjectId(userId),
       type: 'project_updated',
       title: 'Project Updated',
-      description: `Updated project: ${name}`,
+      description: `Updated project: ${updateData.name}`,
       date: new Date(),
-      projectId: new ObjectId(projectId)
+      projectId: new ObjectId(projectId),
+      metadata: {
+        hasImage: !!imageData
+      }
+    });
+
+    // Get updated project
+    const updatedProject = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
     });
 
     res.json({
       success: true,
       message: 'Project updated successfully',
-      project: { ...project, ...updateData }
+      project: updatedProject
     });
 
   } catch (error) {
     console.error('Error updating project:', error);
+    // Clean up uploaded file if error occurs
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(500).json({
       success: false,
-      message: 'Failed to update project'
+      message: 'Failed to update project',
+      error: error.message
     });
   }
 });
@@ -1014,6 +1099,9 @@ router.get('/:id', authenticateUser, async (req, res) => {
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
       
+      // ADD THE MISSING IMAGE FIELD - THIS IS THE FIX!
+      image: project.image || null,
+      
       // Fields the frontend expects
       username: user ? user.username : 'Unknown User',
       startDate: project.createdAt ? new Date(project.createdAt).toLocaleDateString('en-US', {
@@ -1061,6 +1149,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
       } : null
     };
 
+    console.log('Sending project with image data:', !!formattedProject.image); // Debug log
     res.json(formattedProject);
   } catch (error) {
     console.error('Error fetching project:', error);
@@ -1070,6 +1159,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
 
 // ===DEBUG ROUTE - REMOVE IN PRODUCTION=== //
 // Add this temporary debug route to test the individual project endpoint
+// In projects.js - UPDATE the debug route too
 router.get('/debug/:id', authenticateUser, async (req, res) => {
   try {
     const projectId = req.params.id;
@@ -1084,6 +1174,7 @@ router.get('/debug/:id', authenticateUser, async (req, res) => {
     });
     
     console.log('Debug: Found project:', project);
+    console.log('Debug: Project image data:', project.image); // Add this
     
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
@@ -1109,6 +1200,9 @@ router.get('/debug/:id', authenticateUser, async (req, res) => {
       userId: project.userId,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
+      
+      // ADD IMAGE FIELD HERE TOO
+      image: project.image || null,
       
       // Fields the frontend expects but aren't in database - add defaults
       username: user ? user.username : 'Unknown User',

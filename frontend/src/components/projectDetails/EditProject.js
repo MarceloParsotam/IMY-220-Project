@@ -1,4 +1,4 @@
-// EditProject.js - UPDATED
+// EditProject.js - COMPLETE UPDATED FILE
 import React, { useState, useEffect } from 'react';
 
 const EditProject = ({ project, onSave, onCancel }) => {
@@ -11,8 +11,9 @@ const EditProject = ({ project, onSave, onCancel }) => {
     type: '',
     tags: ''
   });
+  const [imagePreview, setImagePreview] = useState(null);
+  const [newImageFile, setNewImageFile] = useState(null);
 
-  // Initialize form data when project changes
   useEffect(() => {
     setFormData({
       name: project.name || '',
@@ -23,6 +24,10 @@ const EditProject = ({ project, onSave, onCancel }) => {
       type: project.type || 'Web Application',
       tags: project.tags?.join(', ') || ''
     });
+
+    if (project.image && project.image.data) {
+      setImagePreview(`data:${project.image.contentType};base64,${project.image.data}`);
+    }
   }, [project]);
 
   const handleChange = (e) => {
@@ -32,10 +37,27 @@ const EditProject = ({ project, onSave, onCancel }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewImageFile(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setNewImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Prepare the data to send to backend
     const updatedData = {
       name: formData.name,
       description: formData.description,
@@ -46,10 +68,9 @@ const EditProject = ({ project, onSave, onCancel }) => {
       tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
     };
     
-    onSave(updatedData);
+    onSave(updatedData, newImageFile);
   };
 
-  // Close modal when clicking outside
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onCancel();
@@ -75,6 +96,35 @@ const EditProject = ({ project, onSave, onCancel }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="edit-form">
+          <div className="form-group">
+            <label htmlFor="projectImage">Project Image</label>
+            <div className="image-upload-section">
+              {imagePreview && (
+                <div className="image-preview">
+                  <img src={imagePreview} alt="Project preview" className="preview-image" />
+                  <button 
+                    type="button" 
+                    className="remove-image-btn"
+                    onClick={handleRemoveImage}
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                id="projectImage"
+                name="projectImage"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="image-input"
+              />
+              <label htmlFor="projectImage" className="image-upload-label">
+                {imagePreview ? 'Change Image' : 'Choose Project Image'}
+              </label>
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="projectName">Project Name</label>
             <input

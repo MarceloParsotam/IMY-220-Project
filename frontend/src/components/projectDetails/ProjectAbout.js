@@ -1,3 +1,4 @@
+// ProjectAbout.js - COMPLETE UPDATED FILE
 import React from 'react';
 
 const ProjectAbout = ({ project }) => {
@@ -10,7 +11,7 @@ const ProjectAbout = ({ project }) => {
         <div className="detail-column">
           <h3 className="detail-subtitle">Members</h3>
           <ul className="detail-list">
-            {project.members.map((member, index) => (
+            {project.members && project.members.map((member, index) => (
               <li key={index} className="detail-item">{member}</li>
             ))}
           </ul>
@@ -19,7 +20,7 @@ const ProjectAbout = ({ project }) => {
         <div className="detail-column">
           <h3 className="detail-subtitle">Technologies</h3>
           <div className="tech-tags">
-            {project.technologies.map((tech, index) => (
+            {project.technologies && project.technologies.map((tech, index) => (
               <span key={index} className="tech-tag">{tech}</span>
             ))}
           </div>
@@ -29,15 +30,15 @@ const ProjectAbout = ({ project }) => {
           <h3 className="detail-subtitle">Project Stats</h3>
           <div className="stats-grid-table">
             <div className="stat-item">
-              <span className="stat-value">{project.downloads}</span>
+              <span className="stat-value">{project.downloads || 0}</span>
               <span className="stat-label">Downloads</span>
             </div>
             <div className="stat-item">
-              <span className="stat-value">{project.stars}</span>
+              <span className="stat-value">{project.stars || 0}</span>
               <span className="stat-label">Stars</span>
             </div>
             <div className="stat-item">
-              <span className="stat-value">{project.version}</span>
+              <span className="stat-value">{project.version || 'v1.0.0'}</span>
               <span className="stat-label">Version</span>
             </div>
           </div>

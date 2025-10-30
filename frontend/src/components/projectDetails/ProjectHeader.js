@@ -1,8 +1,8 @@
-// ProjectHeader.js - Updated with action handlers
+// ProjectHeader.js - UPDATED if needed
 import React from 'react';
 
 const ProjectHeader = ({ project, onCheckout, onCheckin, onFavorite }) => {
-  const isOwner = true; // You'll need to pass this as a prop or determine it
+  const isOwner = true;
 
   return (
     <div className="project-header">
