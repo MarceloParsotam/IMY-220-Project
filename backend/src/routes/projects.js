@@ -1650,7 +1650,7 @@ router.post('/:projectId/files/navigate', authenticateUser, async (req, res) => 
     });
   }
 });
-// Update file content
+// FIXED: PUT /api/projects/:projectId/files/content - Update file content
 router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -1658,42 +1658,80 @@ router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
     const userId = req.user._id;
     const userName = req.user.name || req.user.username;
 
+    console.log('File update request:', { projectId, fileName, path, contentLength: content?.length, changes });
+
     const projectsCollection = viewDocDB.getCollection('projects');
 
+    // First, find the project to debug
     const project = await projectsCollection.findOne({ 
       _id: new ObjectId(projectId) 
     });
 
     if (!project) {
+      console.log('Project not found:', projectId);
       return res.status(404).json({ 
         success: false,
         message: 'Project not found' 
       });
     }
 
+    console.log('Project files:', project.files?.length);
+    
+    const normalizedPath = normalizePath(path || '');
+    console.log('Looking for file:', { fileName, normalizedPath });
+
+    // Find the specific file first to debug
+    const fileToUpdate = project.files?.find(f => 
+      f.name === fileName && 
+      f.path === normalizedPath && 
+      f.type === 'file'
+    );
+
+    if (!fileToUpdate) {
+      console.log('File not found in project files array');
+      console.log('Available files:', project.files?.map(f => ({ name: f.name, path: f.path, type: f.type })));
+      return res.status(404).json({ 
+        success: false,
+        message: 'File not found' 
+      });
+    }
+
+    console.log('Found file to update:', fileToUpdate);
+
     // Update the specific file in the files array
     const result = await projectsCollection.updateOne(
       { 
         _id: new ObjectId(projectId),
         'files.name': fileName,
-        'files.path': path || ''
+        'files.path': normalizedPath
       },
       { 
         $set: { 
           'files.$.content': content,
           'files.$.changes': changes || userName,
           'files.$.time': 'Just now',
-          'files.$.updatedAt': new Date(),
-          updatedAt: new Date()
+          'files.$.updatedAt': new Date()
         }
       }
     );
 
-    if (result.modifiedCount === 0) {
+    console.log('Update result:', {
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount
+    });
+
+    if (result.matchedCount === 0) {
+      console.log('No file matched the update criteria');
       return res.status(400).json({ 
         success: false,
-        message: 'Failed to update file' 
+        message: 'File not found for update' 
       });
+    }
+
+    if (result.modifiedCount === 0) {
+      console.log('File matched but no changes made - possible duplicate content');
+      // This might happen if content is the same, but we should still return success
     }
 
     // Create activity
@@ -1707,10 +1745,13 @@ router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
       projectId: new ObjectId(projectId),
       metadata: {
         projectName: project.name,
-        fileName: fileName
+        fileName: fileName,
+        filePath: normalizedPath,
+        contentLength: content?.length
       }
     });
 
+    console.log('File update successful');
     res.json({ 
       success: true,
       message: 'File updated successfully' 
@@ -1719,7 +1760,7 @@ router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
     console.error('Error updating file:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Server error' 
+      message: 'Server error: ' + error.message 
     });
   }
 });

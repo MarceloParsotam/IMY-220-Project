@@ -1,4 +1,4 @@
-// Enhanced FilesTab.js with proper pathing support
+// Enhanced FilesTab.js with file editing and larger viewer
 import React, { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -14,7 +14,11 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
   const [creatingType, setCreatingType] = useState('file');
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState('');
+  const [editingContent, setEditingContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [viewerSize, setViewerSize] = useState('large'); // 'compact' or 'large'
 
   useEffect(() => {
     navigateToPath(currentPath);
@@ -42,12 +46,10 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         setBreadcrumbs(data.breadcrumbs || []);
       } else {
         console.error('Failed to navigate to path');
-        // Fallback to client-side filtering
         filterFilesByPath(path);
       }
     } catch (error) {
       console.error('Error navigating:', error);
-      // Fallback to client-side filtering
       filterFilesByPath(path);
     }
   };
@@ -56,7 +58,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     const filtered = files.filter(file => file.path === path);
     setCurrentItems(filtered);
     
-    // Build breadcrumbs manually
     if (!path) {
       setBreadcrumbs([{ name: 'root', path: '' }]);
     } else {
@@ -76,14 +77,15 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
 
   const handleFileClick = async (file) => {
     if (file.type === 'folder') {
-      // Navigate into folder
       const newPath = file.path ? `${file.path}/${file.name}` : file.name;
       setCurrentPath(newPath);
       setSelectedFile(null);
       setFileContent('');
+      setEditingContent('');
+      setIsEditing(false);
     } else {
-      // For files, fetch and display content
       setSelectedFile(file);
+      setIsEditing(false);
       try {
         const userData = JSON.parse(localStorage.getItem('user'));
         const token = userData?._id || userData?.id || '';
@@ -103,13 +105,69 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         if (response.ok) {
           const fileData = await response.json();
           setFileContent(fileData.content || '');
+          setEditingContent(fileData.content || '');
         } else {
           setFileContent('// Unable to load file content');
+          setEditingContent('// Unable to load file content');
         }
       } catch (error) {
         console.error('Error fetching file content:', error);
         setFileContent('// Error loading file content');
+        setEditingContent('// Error loading file content');
       }
+    }
+  };
+
+  const handleEditFile = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingContent(fileContent);
+    setIsEditing(false);
+  };
+
+  const handleSaveFile = async () => {
+    if (!selectedFile) return;
+
+    setIsSaving(true);
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/content`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          path: selectedFile.path,
+          content: editingContent,
+          changes: currentUser?.name || currentUser?.username || 'User'
+        })
+      });
+
+      if (response.ok) {
+        setFileContent(editingContent);
+        setIsEditing(false);
+        
+        // Refresh the file list to show updated timestamp
+        if (onRefreshProject) {
+          onRefreshProject();
+        }
+        
+        alert('File saved successfully!');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save file');
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      alert(error.message || 'Error saving file. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -137,23 +195,18 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
       
       const zip = new JSZip();
       
-      // Helper function to add files to zip recursively
       const addFilesToZip = async (fileList, currentPath = '') => {
         for (const file of fileList) {
           if (file.type === 'folder') {
-            // Create folder in zip
             const folderPath = currentPath ? `${currentPath}/${file.name}` : file.name;
             const folder = zip.folder(folderPath);
             
-            // Get files in this folder
             const folderFiles = files.filter(f => 
               f.path === (file.path ? `${file.path}/${file.name}` : file.name)
             );
             
-            // Recursively add files in folder
             await addFilesToZip(folderFiles, folderPath);
           } else {
-            // Fetch file content and add to zip
             try {
               const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/content`, {
                 method: 'POST',
@@ -181,13 +234,9 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         }
       };
 
-      // Add all files to the zip starting from root
       await addFilesToZip(files.filter(f => !f.path));
       
-      // Generate the zip file
       const zipContent = await zip.generateAsync({ type: 'blob' });
-      
-      // Download the zip file
       saveAs(zipContent, `${projectName}-${projectId}.zip`);
       
     } catch (error) {
@@ -230,7 +279,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         if (onRefreshProject) {
           onRefreshProject();
         }
-        // Refresh current view
         navigateToPath(currentPath);
       } else {
         const errorData = await response.json();
@@ -270,13 +318,13 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         if (onRefreshProject) {
           onRefreshProject();
         }
-        // Refresh current view
         navigateToPath(currentPath);
         
-        // If we deleted the currently selected file, clear the viewer
         if (selectedFile && selectedFile.name === file.name && selectedFile.path === file.path) {
           setSelectedFile(null);
           setFileContent('');
+          setEditingContent('');
+          setIsEditing(false);
         }
       } else {
         const errorData = await response.json();
@@ -292,6 +340,12 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     setCurrentPath(path);
     setSelectedFile(null);
     setFileContent('');
+    setEditingContent('');
+    setIsEditing(false);
+  };
+
+  const toggleViewerSize = () => {
+    setViewerSize(viewerSize === 'large' ? 'compact' : 'large');
   };
 
   return (
@@ -362,7 +416,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         ))}
       </div>
 
-      <div className="files-container">
+      <div className={`files-container ${viewerSize === 'large' ? 'large-viewer' : 'compact-viewer'}`}>
         {/* Files List */}
         <div className="files-list">
           <div className="files-table">
@@ -446,7 +500,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
           </div>
         </div>
 
-        {/* File Content Viewer */}
+        {/* File Content Viewer - Enhanced with editing and size toggle */}
         {selectedFile && selectedFile.type === 'file' && (
           <div className="file-content-panel">
             <div className="file-content-header">
@@ -458,12 +512,34 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                   </svg>
                   {selectedFile.name}
                 </h3>
+                <div className="file-viewer-controls">
+                  <button 
+                    className="viewer-size-toggle"
+                    onClick={toggleViewerSize}
+                    title={viewerSize === 'large' ? 'Make viewer smaller' : 'Make viewer larger'}
+                  >
+                    {viewerSize === 'large' ? '⊖' : '⊕'}
+                  </button>
+                </div>
               </div>
               <div className="file-meta">
                 <span>Path: {selectedFile.path || 'root'}</span>
                 <span>Last updated: {selectedFile.time}</span>
                 <span>By: {selectedFile.changes}</span>
                 <span>Size: {fileContent.length} characters</span>
+                {currentUser && !isEditing && (
+                  <button 
+                    className="edit-btn"
+                    onClick={handleEditFile}
+                    title="Edit this file"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                  </button>
+                )}
                 <button 
                   className="download-btn"
                   onClick={handleDownloadFile}
@@ -479,9 +555,37 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
             </div>
             
             <div className="code-viewer">
-              <pre className="code-content">
-                <code>{fileContent}</code>
-              </pre>
+              {isEditing ? (
+                <div className="edit-mode">
+                  <textarea
+                    className="code-editor"
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    spellCheck="false"
+                    placeholder="Enter file content..."
+                  />
+                  <div className="edit-actions">
+                    <button 
+                      className="cancel-btn"
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="save-btn"
+                      onClick={handleSaveFile}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <pre className="code-content">
+                  <code>{fileContent}</code>
+                </pre>
+              )}
             </div>
           </div>
         )}

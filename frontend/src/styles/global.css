@@ -3856,7 +3856,7 @@ button {
   align-items: center;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background: #f8f9fa;
+  background: var(--primary-light);
   border-radius: 4px;
 }
 .file-viewer-container {
@@ -3940,7 +3940,7 @@ button {
 }
 
 .code-viewer {
-  background: #f6f8fa;
+  background: var(--dark);
 }
 
 .code-content {
@@ -3959,6 +3959,7 @@ button {
 .code-content code {
   display: block;
   white-space: pre;
+  color: white;
 }
 
 /* Syntax highlighting for common file types */
@@ -4750,7 +4751,7 @@ button {
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: #f6f8fa;
+  background: var(--primary-light);
   border: 1px solid #e1e4e8;
   border-radius: 6px 6px 0 0;
   margin-bottom: 0;
@@ -4833,10 +4834,204 @@ button {
 }
 
 .directory-row:hover {
-  background-color: #f6f8fa;
+  background-color: var(--primary);
 }
 
 .table-row.selected {
-  background-color: #e3f2fd;
+  background-color: var(--secondary);
   border-left: 3px solid #0366d6;
+}
+/* Enhanced file viewer and editing styles */
+.files-container {
+  display: grid;
+  gap: 1rem;
+  height: 600px;
+}
+
+.files-container.compact-viewer {
+  grid-template-columns: 1fr 1fr;
+}
+
+.files-container.large-viewer {
+  grid-template-columns: 1fr 2fr;
+}
+
+.file-content-panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  background: white;
+  height: 100%;
+}
+
+.file-content-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: var(--gray-600);
+}
+
+.file-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.file-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #24292e;
+}
+
+.file-viewer-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewer-size-toggle {
+  background: #6c757d;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.viewer-size-toggle:hover {
+  background: #5a6268;
+}
+
+.file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #586069;
+}
+
+.file-meta span {
+  display: flex;
+  align-items: center;
+}
+
+.edit-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.edit-btn:hover {
+  background: #0056b3;
+}
+
+.code-viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.code-content {
+  flex: 1;
+  margin: 0;
+  padding: 1rem;
+  background: var(--dark);
+  border: none;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.edit-mode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.code-editor {
+  flex: 1;
+  margin: 0;
+  padding: 1rem;
+  border: none;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  resize: none;
+  background: var(--dark);
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.code-editor:focus {
+  outline: none;
+}
+
+.edit-actions {
+  padding: 1rem;
+  background: var(--dark);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+.save-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+
+.save-btn:disabled,
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .files-container.compact-viewer,
+  .files-container.large-viewer {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .file-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
