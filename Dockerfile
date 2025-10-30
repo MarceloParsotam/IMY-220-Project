@@ -2,7 +2,7 @@
 FROM node:20-alpine
 
 # Set working directory
-WORKDIR /u22491717-Pos7-Project-D2
+WORKDIR /u22491717-Pos7-Project-D3
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
