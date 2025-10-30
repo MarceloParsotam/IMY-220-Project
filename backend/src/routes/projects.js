@@ -1179,6 +1179,70 @@ router.get('/:projectId/favorites-count', authenticateUser, async (req, res) => 
     });
   }
 });
+// GET /api/projects/:projectId/views - Get views count
+router.get('/:projectId/views', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      viewsCount: project.views || 0
+    });
+  } catch (error) {
+    console.error('Error fetching views count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch views count'
+    });
+  }
+});
+
+// POST /api/projects/:projectId/increment-views - Increment views count
+router.post('/:projectId/increment-views', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    // Increment the views count
+    const result = await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $inc: { views: 1 },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to increment views'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Views count incremented'
+    });
+  } catch (error) {
+    console.error('Error incrementing views:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to increment views'
+    });
+  }
+});
 // ===DEBUG ROUTE - REMOVE IN PRODUCTION=== //
 // Add this temporary debug route to test the individual project endpoint
 // In projects.js - UPDATE the debug route too

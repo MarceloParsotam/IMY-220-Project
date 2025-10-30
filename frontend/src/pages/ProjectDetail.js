@@ -1,4 +1,4 @@
-// ProjectDetail.js - SIMPLE FIX
+// ProjectDetail.js - FIXED with views tracking
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProjectHeader from '../components/projectDetails/ProjectHeader';
@@ -69,6 +69,29 @@ const ProjectDetail = () => {
     }
   };
 
+  // Increment views count when project is loaded
+  const incrementViewsCount = async () => {
+    if (!projectId) return;
+    
+    try {
+      const token = getToken();
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/increment-views`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.log('Failed to increment views count');
+      }
+    } catch (error) {
+      console.error('Error incrementing views:', error);
+      // Don't show error to user - views tracking is not critical
+    }
+  };
+
   useEffect(() => {
     if (projectId) {
       fetchProjectData(projectId);
@@ -77,6 +100,13 @@ const ProjectDetail = () => {
       setLoading(false);
     }
   }, [projectId]);
+
+  // Increment views when project is successfully loaded
+  useEffect(() => {
+    if (project && project._id) {
+      incrementViewsCount();
+    }
+  }, [project]); // This runs when project changes
 
   // Get image URL - SIMPLE VERSION
   const getImageUrl = () => {
@@ -98,7 +128,6 @@ const ProjectDetail = () => {
 
   const imageUrl = getImageUrl();
 
-  // ... rest of your functions (handleAddMessage, handleSaveProject, etc.) remain the same
   const handleAddMessage = async (message, type) => {
     if (!project || !currentUser || !message.trim()) {
       setError('Message cannot be empty');
