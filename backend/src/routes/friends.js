@@ -9,6 +9,7 @@ router.get('/:userId', authenticateUser, async (req, res) => {
   try {
     const { userId } = req.params;
     const usersCollection = viewDocDB.getCollection('users');
+    const projectsCollection = viewDocDB.getCollection('projects');
 
     const user = await usersCollection.findOne(
       { _id: new ObjectId(userId) },
@@ -25,10 +26,24 @@ router.get('/:userId', authenticateUser, async (req, res) => {
     const friends = await usersCollection.find({
       _id: { $in: user.friends || [] }
     })
-    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, projects: 1 })
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, friends: 1 })
     .toArray();
 
-    const transformedFriends = friends.map(friend => ({
+    // Get project counts for each friend
+    const friendsWithProjectCounts = await Promise.all(
+      friends.map(async (friend) => {
+        const projectCount = await projectsCollection.countDocuments({
+          userId: friend._id
+        });
+
+        return {
+          ...friend,
+          projectCount: projectCount
+        };
+      })
+    );
+
+    const transformedFriends = friendsWithProjectCounts.map(friend => ({
       id: friend._id,
       name: `${friend.name} ${friend.surname}`,
       username: friend.username,
@@ -37,8 +52,8 @@ router.get('/:userId', authenticateUser, async (req, res) => {
         '/default-avatar.png',
       title: friend.bio || 'Developer',
       skills: friend.skills || [],
-      projects: friend.projects ? friend.projects.length : 0,
-      followers: Math.floor(Math.random() * 2000) + 100
+      projects: friend.projectCount || 0,
+      followers: friend.friends ? friend.friends.length : 0
     }));
 
     res.json({
@@ -76,7 +91,7 @@ router.get('/requests/:userId', authenticateUser, async (req, res) => {
     const requests = await usersCollection.find({
       _id: { $in: user.friendRequests || [] }
     })
-    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1 })
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, friends: 1 })
     .toArray();
 
     const transformedRequests = requests.map(request => ({
@@ -85,7 +100,7 @@ router.get('/requests/:userId', authenticateUser, async (req, res) => {
         `http://localhost:3000/api/users/${request._id}/avatar` : 
         '/default-avatar.png',
       name: `${request.name} ${request.surname}`,
-      meta: `${request.skills?.[0] || 'Developer'} • ${Math.floor(Math.random() * 5) + 1} mutual connections`
+      meta: `${request.skills?.[0] || 'Developer'} • ${request.friends ? request.friends.length : 0} friends`
     }));
 
     res.json({
@@ -107,6 +122,7 @@ router.get('/suggestions/:userId', authenticateUser, async (req, res) => {
   try {
     const { userId } = req.params;
     const usersCollection = viewDocDB.getCollection('users');
+    const projectsCollection = viewDocDB.getCollection('projects');
 
     const currentUser = await usersCollection.findOne(
       { _id: new ObjectId(userId) },
@@ -136,26 +152,39 @@ router.get('/suggestions/:userId', authenticateUser, async (req, res) => {
 
     const suggestions = await usersCollection.find(query)
     .limit(12)
-    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, projects: 1 })
+    .project({ name: 1, surname: 1, username: 1, avatar: 1, bio: 1, skills: 1, friends: 1 })
     .toArray();
 
-    const transformedSuggestions = suggestions.map(suggestion => {
-      const wasConnected = currentUser.removedFriends && 
-        currentUser.removedFriends.some(removedId => removedId.equals(suggestion._id));
-      
-      return {
-        id: suggestion._id,
-        avatar: (suggestion.avatar && suggestion.avatar.data) ? 
-          `http://localhost:3000/api/users/${suggestion._id}/avatar` : 
-          '/default-avatar.png',
-        name: `${suggestion.name} ${suggestion.surname}`,
-        title: suggestion.bio || 'Developer',
-        skills: suggestion.skills || [],
-        projects: suggestion.projects ? suggestion.projects.length : 0,
-        followers: Math.floor(Math.random() * 2000) + 100,
-        wasConnected: wasConnected
-      };
-    });
+    // Get project counts for each suggestion
+    const suggestionsWithProjectCounts = await Promise.all(
+      suggestions.map(async (suggestion) => {
+        const projectCount = await projectsCollection.countDocuments({
+          userId: suggestion._id
+        });
+
+        const wasConnected = currentUser.removedFriends && 
+          currentUser.removedFriends.some(removedId => removedId.equals(suggestion._id));
+
+        return {
+          ...suggestion,
+          projectCount: projectCount,
+          wasConnected: wasConnected
+        };
+      })
+    );
+
+    const transformedSuggestions = suggestionsWithProjectCounts.map(suggestion => ({
+      id: suggestion._id,
+      avatar: (suggestion.avatar && suggestion.avatar.data) ? 
+        `http://localhost:3000/api/users/${suggestion._id}/avatar` : 
+        '/default-avatar.png',
+      name: `${suggestion.name} ${suggestion.surname}`,
+      title: suggestion.bio || 'Developer',
+      skills: suggestion.skills || [],
+      projects: suggestion.projectCount || 0,
+      followers: suggestion.friends ? suggestion.friends.length : 0,
+      wasConnected: suggestion.wasConnected || false
+    }));
 
     res.json({
       success: true,
@@ -301,7 +330,10 @@ router.delete('/remove', authenticateUser, async (req, res) => {
 
     await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
-      { $pull: { friends: new ObjectId(friendId) } }
+      { 
+        $pull: { friends: new ObjectId(friendId) },
+        $addToSet: { removedFriends: new ObjectId(friendId) }
+      }
     );
 
     await usersCollection.updateOne(
@@ -323,6 +355,7 @@ router.delete('/remove', authenticateUser, async (req, res) => {
     });
   }
 });
+
 // GET /api/friends/status/:userId - Check friendship status
 router.get('/status/:userId', authenticateUser, async (req, res) => {
   try {
