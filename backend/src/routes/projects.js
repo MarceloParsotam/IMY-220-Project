@@ -1156,7 +1156,29 @@ router.get('/:id', authenticateUser, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+// GET /api/projects/:projectId/favorites-count - Get real favorites count
+router.get('/:projectId/favorites-count', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const favoritesCollection = viewDocDB.getCollection('favorites');
 
+    // Count how many users have favorited this project
+    const favoritesCount = await favoritesCollection.countDocuments({
+      projectId: new ObjectId(projectId)
+    });
+
+    res.json({
+      success: true,
+      favoritesCount: favoritesCount
+    });
+  } catch (error) {
+    console.error('Error fetching favorites count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch favorites count'
+    });
+  }
+});
 // ===DEBUG ROUTE - REMOVE IN PRODUCTION=== //
 // Add this temporary debug route to test the individual project endpoint
 // In projects.js - UPDATE the debug route too

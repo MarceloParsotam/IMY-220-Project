@@ -1,12 +1,15 @@
-// ProjectAbout.js - FIXED
+// ProjectAbout.js - FIXED with stars removed
 import React, { useState, useEffect } from 'react';
 
 const ProjectAbout = ({ project }) => {
   const [members, setMembers] = useState([]);
+  const [favoritesCount, setFavoritesCount] = useState(0);
 
   useEffect(() => {
     // Fetch members from the API to ensure consistency
     fetchMembers();
+    // Fetch real favorites count from the database
+    fetchFavoritesCount();
   }, [project._id]);
 
   const fetchMembers = async () => {
@@ -34,6 +37,33 @@ const ProjectAbout = ({ project }) => {
       // Fallback to project.members if API fails
       console.log('Using fallback members due to error');
       setMembers(Array.isArray(project.members) ? project.members : []);
+    }
+  };
+
+  const fetchFavoritesCount = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      // Fetch real favorites count from the API
+      const response = await fetch(`http://localhost:3000/api/projects/${project._id}/favorites-count`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFavoritesCount(data.favoritesCount || 0);
+      } else {
+        console.log('Using fallback favorites count');
+        // If the endpoint doesn't exist yet, use 0 as fallback
+        setFavoritesCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching favorites count:', error);
+      setFavoritesCount(0);
     }
   };
 
@@ -86,12 +116,8 @@ const ProjectAbout = ({ project }) => {
           <h3 className="detail-subtitle">Project Stats</h3>
           <div className="stats-grid-table">
             <div className="stat-item">
-              <span className="stat-value">{project.downloads || 0}</span>
-              <span className="stat-label">Downloads</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">{project.stars || 0}</span>
-              <span className="stat-label">Stars</span>
+              <span className="stat-value">{favoritesCount}</span>
+              <span className="stat-label">Favorites</span>
             </div>
             <div className="stat-item">
               <span className="stat-value">{project.version || 'v1.0.0'}</span>
