@@ -1,0 +1,52 @@
+.admin-access-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-access-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.admin-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.admin-access-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.admin-access-content p {
+  margin: 0 0 16px 0;
+  opacity: 0.9;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.admin-access-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.admin-access-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

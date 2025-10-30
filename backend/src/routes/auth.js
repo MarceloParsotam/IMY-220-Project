@@ -93,7 +93,7 @@ router.post('/login', async (req, res) => {
     try {
         const usersCollection = viewDocDB.getCollection('users');
         
-        // Find user in database
+        // Find user in database - include ALL fields except password
         const user = await usersCollection.findOne({ email });
 
         if (!user) {
@@ -111,13 +111,30 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Return success response with user data (excluding password)
-        const { password: _, ...userWithoutPassword } = user;
+        // Return success response with user data (excluding password but including isAdmin)
+        const userResponse = {
+            _id: user._id,
+            name: user.name,
+            surname: user.surname,
+            username: user.username,
+            email: user.email,
+            joinedDate: user.joinedDate,
+            skills: user.skills || [],
+            friends: user.friends || [],
+            friendRequests: user.friendRequests || [],
+            removedFriends: user.removedFriends || [],
+            about: user.about || "No about information available",
+            bio: user.bio || "No bio available",
+            avatar: user.avatar || null,
+            isAdmin: user.isAdmin || false, // Ensure isAdmin is included
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        };
         
         res.json({
             success: true,
             message: 'Login successful',
-            user: userWithoutPassword,
+            user: userResponse,
             userId: user._id.toString()
         });
     } catch (error) {

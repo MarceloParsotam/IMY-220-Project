@@ -89,7 +89,7 @@ const ProjectCard = ({ project, onCheckoutUpdate, onDeleteProject, onEditProject
   useEffect(() => {
     fetchCheckoutStatus();
     setIsFavorite(project.isFavorite || false);
-  }, [project.id, project.isFavorite]);
+  }, [project.id, project._id, project.isFavorite]);
 
   const handleCheckout = async () => {
     try {

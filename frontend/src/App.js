@@ -8,6 +8,7 @@ import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Friends from './pages/Friends';
 import Profile from './pages/Profile';
+import AdminPanel from './components/admin/AdminPanel';
 
 // Protected Route component using AuthContext
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +77,12 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/admin" 
+            element={
+              <AdminPanel />
+              } 
+            />
         </Routes>
       </Router>
     </AuthProvider>

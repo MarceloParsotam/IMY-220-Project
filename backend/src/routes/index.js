@@ -7,6 +7,7 @@ const profileRoutes = require('./profile');
 const projectRoutes = require('./projects');
 const friendRoutes = require('./friends');
 const activityRoutes = require('./activities');
+const adminRoutes = require('./admin');
 
 // Use routes
 router.use('/auth', authRoutes);
@@ -14,5 +15,6 @@ router.use('/users', profileRoutes);
 router.use('/projects', projectRoutes);
 router.use('/friends', friendRoutes);
 router.use('/activities', activityRoutes);
+router.use('/admin', adminRoutes);
 
 module.exports = router;
