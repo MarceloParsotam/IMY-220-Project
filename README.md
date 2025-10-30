@@ -99,7 +99,7 @@ http://localhost:3000
 ```npm run build``` - Build for production
 ```npm start``` - Start production server
 
-## Running the Project with Docker D2
+## Running the Project with Docker D3
 
 # IMY 220 Project - View Doc
 
