@@ -4745,3 +4745,98 @@ button {
   color: #383d41;
   border: 1px solid #d6d8db;
 }
+/* Enhanced file system CSS */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 0;
+}
+
+.breadcrumb-item {
+  background: none;
+  border: none;
+  color: #0366d6;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-item:hover {
+  background: #e1e4e8;
+}
+
+.breadcrumb-item.active {
+  color: #24292e;
+  font-weight: 600;
+  cursor: default;
+}
+
+.breadcrumb-item.active:hover {
+  background: none;
+}
+
+.breadcrumb-separator {
+  margin: 0 0.5rem;
+  color: #6a737d;
+}
+
+.current-path {
+  padding: 0.5rem;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #586069;
+}
+
+.add-folder-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.add-folder-btn:hover {
+  background: #218838;
+}
+
+.file-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 1rem;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.directory-row {
+  cursor: pointer;
+}
+
+.directory-row:hover {
+  background-color: #f6f8fa;
+}
+
+.table-row.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #0366d6;
+}

@@ -1424,7 +1424,7 @@ router.post('/:projectId/checkout-message', authenticateUser, async (req, res) =
 });
 // In projects.js - REPLACE the file routes with these:
 
-// Add file to project
+// POST /api/projects/:projectId/files - Add file or folder with proper pathing
 router.post('/:projectId/files', authenticateUser, async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -1446,16 +1446,35 @@ router.post('/:projectId/files', authenticateUser, async (req, res) => {
       });
     }
 
-    // Create new file object
+    // Validate path format
+    const normalizedPath = normalizePath(path || '');
+    
+    // Check if file/folder already exists in the same path
+    const existingFile = project.files?.find(f => 
+      f.name === name && f.path === normalizedPath
+    );
+
+    if (existingFile) {
+      return res.status(400).json({ 
+        success: false,
+        message: `A ${type} with this name already exists in this location` 
+      });
+    }
+
+    // For folders, ensure they don't have content
+    const fileContent = type === 'folder' ? '' : (content || '');
+
+    // Create new file/folder object
     const newFile = {
       name,
-      content: type === 'file' ? content : '',
+      content: fileContent,
       type: type || 'file',
-      path: path || '',
+      path: normalizedPath,
       changes: changes || userName,
       time: time || 'Just now',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      fullPath: getFullPath(normalizedPath, name)
     };
 
     // Update project with new file
@@ -1478,21 +1497,22 @@ router.post('/:projectId/files', authenticateUser, async (req, res) => {
     const activitiesCollection = viewDocDB.getCollection('activities');
     await activitiesCollection.insertOne({
       userId: new ObjectId(userId),
-      type: 'file_added',
-      title: 'File Added',
+      type: type === 'folder' ? 'folder_added' : 'file_added',
+      title: type === 'folder' ? 'Folder Added' : 'File Added',
       description: `Added ${type === 'folder' ? 'folder' : 'file'}: ${name} to project: ${project.name}`,
       date: new Date(),
       projectId: new ObjectId(projectId),
       metadata: {
         projectName: project.name,
         fileName: name,
-        fileType: type
+        fileType: type,
+        filePath: normalizedPath
       }
     });
 
     res.json({ 
       success: true,
-      message: 'File added successfully', 
+      message: `${type === 'folder' ? 'Folder' : 'File'} added successfully`, 
       file: newFile 
     });
   } catch (error) {
@@ -1503,8 +1523,40 @@ router.post('/:projectId/files', authenticateUser, async (req, res) => {
     });
   }
 });
+// GET /api/projects/:projectId/files/structure - Get file structure with proper nesting
+router.get('/:projectId/files/structure', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const projectsCollection = viewDocDB.getCollection('projects');
 
-// Get file content
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    // Build hierarchical file structure
+    const fileStructure = buildFileStructure(project.files || []);
+
+    res.json({
+      success: true,
+      structure: fileStructure,
+      flatFiles: project.files || []
+    });
+  } catch (error) {
+    console.error('Error fetching file structure:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
+// POST /api/projects/:projectId/files/content - Get file content with proper pathing
 router.post('/:projectId/files/content', authenticateUser, async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -1523,9 +1575,11 @@ router.post('/:projectId/files/content', authenticateUser, async (req, res) => {
       });
     }
 
-    // Find the file in project's files array
+    const normalizedPath = normalizePath(path || '');
+
+    // Find the file in project's files array with exact path match
     const file = project.files?.find(f => 
-      f.name === fileName && (f.path === path || (!f.path && !path))
+      f.name === fileName && f.path === normalizedPath && f.type === 'file'
     );
 
     if (!file) {
@@ -1540,8 +1594,10 @@ router.post('/:projectId/files/content', authenticateUser, async (req, res) => {
       name: file.name,
       content: file.content || '',
       type: file.type,
+      path: file.path,
       changes: file.changes,
-      time: file.time
+      time: file.time,
+      fullPath: file.fullPath
     });
   } catch (error) {
     console.error('Error fetching file content:', error);
@@ -1551,7 +1607,49 @@ router.post('/:projectId/files/content', authenticateUser, async (req, res) => {
     });
   }
 });
+// POST /api/projects/:projectId/files/navigate - Navigate to folder
+router.post('/:projectId/files/navigate', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { path } = req.body;
 
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    const normalizedPath = normalizePath(path || '');
+    
+    // Get files and folders in the current path
+    const currentItems = (project.files || []).filter(f => 
+      f.path === normalizedPath
+    );
+
+    // Get breadcrumb path
+    const breadcrumbs = getBreadcrumbs(normalizedPath);
+
+    res.json({
+      success: true,
+      path: normalizedPath,
+      items: currentItems,
+      breadcrumbs: breadcrumbs
+    });
+  } catch (error) {
+    console.error('Error navigating files:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
 // Update file content
 router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
   try {
@@ -1625,7 +1723,161 @@ router.put('/:projectId/files/content', authenticateUser, async (req, res) => {
     });
   }
 });
+// DELETE /api/projects/:projectId/files - Delete file or folder
+router.delete('/:projectId/files', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { fileName, path, type } = req.body;
+    const userId = req.user._id;
 
+    const projectsCollection = viewDocDB.getCollection('projects');
+
+    const project = await projectsCollection.findOne({ 
+      _id: new ObjectId(projectId) 
+    });
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    const normalizedPath = normalizePath(path || '');
+
+    // For folders, check if they contain any files
+    if (type === 'folder') {
+      const hasChildren = project.files?.some(f => 
+        f.path.startsWith(`${normalizedPath}${normalizedPath ? '/' : ''}${fileName}/`)
+      );
+
+      if (hasChildren) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Cannot delete folder that contains files' 
+        });
+      }
+    }
+
+    // Remove the file/folder
+    const result = await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $pull: { 
+          files: { 
+            name: fileName, 
+            path: normalizedPath 
+          } 
+        },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'File not found or already deleted' 
+      });
+    }
+
+    // Create activity
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(userId),
+      type: type === 'folder' ? 'folder_deleted' : 'file_deleted',
+      title: type === 'folder' ? 'Folder Deleted' : 'File Deleted',
+      description: `Deleted ${type === 'folder' ? 'folder' : 'file'}: ${fileName} from project: ${project.name}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        fileName: fileName,
+        fileType: type,
+        filePath: normalizedPath
+      }
+    });
+
+    res.json({ 
+      success: true,
+      message: `${type === 'folder' ? 'Folder' : 'File'} deleted successfully` 
+    });
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error' 
+    });
+  }
+});
+
+// Helper functions for file pathing
+function normalizePath(path) {
+  if (!path) return '';
+  // Remove leading/trailing slashes and normalize
+  return path.replace(/^\/+|\/+$/g, '');
+}
+
+function getFullPath(path, name) {
+  if (!path) return name;
+  return `${path}/${name}`;
+}
+
+function buildFileStructure(files) {
+  const structure = {
+    name: 'root',
+    type: 'folder',
+    path: '',
+    children: []
+  };
+
+  files.forEach(file => {
+    const pathParts = file.path ? file.path.split('/') : [];
+    let currentLevel = structure.children;
+
+    // Build the folder hierarchy
+    pathParts.forEach((part, index) => {
+      let folder = currentLevel.find(item => item.name === part && item.type === 'folder');
+      
+      if (!folder) {
+        folder = {
+          name: part,
+          type: 'folder',
+          path: pathParts.slice(0, index + 1).join('/'),
+          children: []
+        };
+        currentLevel.push(folder);
+      }
+      
+      currentLevel = folder.children;
+    });
+
+    // Add the file to the current level
+    currentLevel.push({
+      ...file,
+      children: file.type === 'folder' ? [] : undefined
+    });
+  });
+
+  return structure;
+}
+
+function getBreadcrumbs(path) {
+  if (!path) return [{ name: 'root', path: '' }];
+  
+  const parts = path.split('/');
+  const breadcrumbs = [{ name: 'root', path: '' }];
+  
+  let currentPath = '';
+  parts.forEach(part => {
+    currentPath = currentPath ? `${currentPath}/${part}` : part;
+    breadcrumbs.push({
+      name: part,
+      path: currentPath
+    });
+  });
+  
+  return breadcrumbs;
+}
 // Add discussion to project
 router.post('/:projectId/discussion', authenticateUser, async (req, res) => {
   try {

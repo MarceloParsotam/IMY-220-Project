@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+// Enhanced FilesTab.js with proper pathing support
+import React, { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
 const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projectName = "project" }) => {
   const [currentPath, setCurrentPath] = useState('');
+  const [currentItems, setCurrentItems] = useState([]);
+  const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const [newFileContent, setNewFileContent] = useState('');
@@ -13,26 +16,69 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
   const [fileContent, setFileContent] = useState('');
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
-  const getFilesInCurrentPath = () => {
-    return files.filter(file => {
-      const filePath = file.path || '';
-      return filePath === currentPath;
-    });
+  useEffect(() => {
+    navigateToPath(currentPath);
+  }, [files, currentPath]);
+
+  const navigateToPath = async (path) => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/navigate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          path: path
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentItems(data.items || []);
+        setBreadcrumbs(data.breadcrumbs || []);
+      } else {
+        console.error('Failed to navigate to path');
+        // Fallback to client-side filtering
+        filterFilesByPath(path);
+      }
+    } catch (error) {
+      console.error('Error navigating:', error);
+      // Fallback to client-side filtering
+      filterFilesByPath(path);
+    }
   };
 
-  const getSubdirectories = () => {
-    const dirs = new Set();
-    files.forEach(file => {
-      if (file.type === 'folder') {
-        dirs.add(file.name + '/');
-      }
-    });
-    return Array.from(dirs);
+  const filterFilesByPath = (path) => {
+    const filtered = files.filter(file => file.path === path);
+    setCurrentItems(filtered);
+    
+    // Build breadcrumbs manually
+    if (!path) {
+      setBreadcrumbs([{ name: 'root', path: '' }]);
+    } else {
+      const parts = path.split('/');
+      const breadcrumbs = [{ name: 'root', path: '' }];
+      let currentPath = '';
+      parts.forEach(part => {
+        currentPath = currentPath ? `${currentPath}/${part}` : part;
+        breadcrumbs.push({
+          name: part,
+          path: currentPath
+        });
+      });
+      setBreadcrumbs(breadcrumbs);
+    }
   };
 
   const handleFileClick = async (file) => {
     if (file.type === 'folder') {
-      setCurrentPath(file.name + '/');
+      // Navigate into folder
+      const newPath = file.path ? `${file.path}/${file.name}` : file.name;
+      setCurrentPath(newPath);
       setSelectedFile(null);
       setFileContent('');
     } else {
@@ -50,7 +96,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
           },
           body: JSON.stringify({
             fileName: file.name,
-            path: currentPath
+            path: file.path
           })
         });
 
@@ -70,11 +116,9 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
   const handleDownloadFile = () => {
     if (!selectedFile || !fileContent) return;
 
-    // Create a blob with the file content
     const blob = new Blob([fileContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     
-    // Create a temporary anchor element to trigger download
     const a = document.createElement('a');
     a.href = url;
     a.download = selectedFile.name;
@@ -82,7 +126,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     a.click();
     document.body.removeChild(a);
     
-    // Clean up the URL object
     URL.revokeObjectURL(url);
   };
 
@@ -99,11 +142,16 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         for (const file of fileList) {
           if (file.type === 'folder') {
             // Create folder in zip
-            const folder = zip.folder(file.name);
+            const folderPath = currentPath ? `${currentPath}/${file.name}` : file.name;
+            const folder = zip.folder(folderPath);
             
-            // For simplicity, we'll just create an empty folder
-            // In a real implementation, you might want to fetch nested files
-            folder.file('.gitkeep', ''); // Add empty file to ensure folder is created
+            // Get files in this folder
+            const folderFiles = files.filter(f => 
+              f.path === (file.path ? `${file.path}/${file.name}` : file.name)
+            );
+            
+            // Recursively add files in folder
+            await addFilesToZip(folderFiles, folderPath);
           } else {
             // Fetch file content and add to zip
             try {
@@ -115,7 +163,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 },
                 body: JSON.stringify({
                   fileName: file.name,
-                  path: currentPath
+                  path: file.path
                 })
               });
 
@@ -126,7 +174,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               }
             } catch (error) {
               console.error(`Error fetching file ${file.name}:`, error);
-              // Add empty file if we can't fetch content
               const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
               zip.file(filePath, `// Unable to load content for ${file.name}`);
             }
@@ -134,8 +181,8 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         }
       };
 
-      // Add all files to the zip
-      await addFilesToZip(files);
+      // Add all files to the zip starting from root
+      await addFilesToZip(files.filter(f => !f.path));
       
       // Generate the zip file
       const zipContent = await zip.generateAsync({ type: 'blob' });
@@ -183,6 +230,8 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         if (onRefreshProject) {
           onRefreshProject();
         }
+        // Refresh current view
+        navigateToPath(currentPath);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to add file');
@@ -195,13 +244,55 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     }
   };
 
-  const navigateToPath = (path) => {
+  const handleDeleteFile = async (file) => {
+    if (!window.confirm(`Are you sure you want to delete ${file.type === 'folder' ? 'the folder' : 'the file'} "${file.name}"?`)) {
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          path: file.path,
+          type: file.type
+        })
+      });
+
+      if (response.ok) {
+        if (onRefreshProject) {
+          onRefreshProject();
+        }
+        // Refresh current view
+        navigateToPath(currentPath);
+        
+        // If we deleted the currently selected file, clear the viewer
+        if (selectedFile && selectedFile.name === file.name && selectedFile.path === file.path) {
+          setSelectedFile(null);
+          setFileContent('');
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to delete file');
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('Error deleting file. Please try again.');
+    }
+  };
+
+  const handleBreadcrumbClick = (path) => {
     setCurrentPath(path);
     setSelectedFile(null);
     setFileContent('');
   };
-
-  const breadcrumbs = currentPath ? currentPath.split('/').filter(Boolean) : [];
 
   return (
     <section className="project-section">
@@ -217,6 +308,17 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               }}
             >
               Add File
+            </button>
+          )}
+          {currentUser && (
+            <button 
+              className="add-folder-btn"
+              onClick={() => {
+                setCreatingType('folder');
+                setShowAddFileModal(true);
+              }}
+            >
+              Add Folder
             </button>
           )}
           <button 
@@ -247,30 +349,17 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
 
       {/* Breadcrumbs */}
       <div className="breadcrumbs">
-        <button 
-          className="breadcrumb-item" 
-          onClick={() => {
-            setCurrentPath('');
-            setSelectedFile(null);
-            setFileContent('');
-          }}
-        >
-          root
-        </button>
-        {breadcrumbs.map((crumb, index) => {
-          const path = breadcrumbs.slice(0, index + 1).join('/') + '/';
-          return (
-            <React.Fragment key={path}>
-              <span className="breadcrumb-separator">/</span>
-              <button 
-                className="breadcrumb-item"
-                onClick={() => navigateToPath(path)}
-              >
-                {crumb}
-              </button>
-            </React.Fragment>
-          );
-        })}
+        {breadcrumbs.map((crumb, index) => (
+          <React.Fragment key={crumb.path}>
+            {index > 0 && <span className="breadcrumb-separator">/</span>}
+            <button 
+              className={`breadcrumb-item ${crumb.path === currentPath ? 'active' : ''}`}
+              onClick={() => handleBreadcrumbClick(crumb.path)}
+            >
+              {crumb.name}
+            </button>
+          </React.Fragment>
+        ))}
       </div>
 
       <div className="files-container">
@@ -281,13 +370,14 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               <span className="file-name">Name</span>
               <span className="file-changes">Last Updated By</span>
               <span className="file-time">Last Updated</span>
+              {currentUser && <span className="file-actions">Actions</span>}
             </div>
             
             {/* Folders first */}
-            {files.filter(f => f.type === 'folder').map((folder, index) => (
+            {currentItems.filter(f => f.type === 'folder').map((folder, index) => (
               <div 
                 key={index} 
-                className={`table-row directory-row ${selectedFile?.name === folder.name ? 'selected' : ''}`}
+                className={`table-row directory-row ${selectedFile?.name === folder.name && selectedFile?.path === folder.path ? 'selected' : ''}`}
                 onClick={() => handleFileClick(folder)}
               >
                 <span className="file-name">
@@ -298,14 +388,28 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 </span>
                 <span className="file-changes">{folder.changes}</span>
                 <span className="file-time">{folder.time}</span>
+                {currentUser && (
+                  <span className="file-actions">
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFile(folder);
+                      }}
+                      title="Delete folder"
+                    >
+                      Delete
+                    </button>
+                  </span>
+                )}
               </div>
             ))}
 
             {/* Files */}
-            {files.filter(f => f.type === 'file').map((file, index) => (
+            {currentItems.filter(f => f.type === 'file').map((file, index) => (
               <div 
                 key={index} 
-                className={`table-row ${selectedFile?.name === file.name ? 'selected' : ''}`}
+                className={`table-row ${selectedFile?.name === file.name && selectedFile?.path === file.path ? 'selected' : ''}`}
                 onClick={() => handleFileClick(file)}
               >
                 <span className="file-name">
@@ -317,19 +421,33 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 </span>
                 <span className="file-changes">{file.changes}</span>
                 <span className="file-time">{file.time}</span>
+                {currentUser && (
+                  <span className="file-actions">
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFile(file);
+                      }}
+                      title="Delete file"
+                    >
+                      Delete
+                    </button>
+                  </span>
+                )}
               </div>
             ))}
 
-            {files.length === 0 && (
+            {currentItems.length === 0 && (
               <div className="no-files">
-                <p>No files in this project</p>
+                <p>No files or folders in this location</p>
               </div>
             )}
           </div>
         </div>
 
         {/* File Content Viewer */}
-        {selectedFile && (
+        {selectedFile && selectedFile.type === 'file' && (
           <div className="file-content-panel">
             <div className="file-content-header">
               <div className="file-header-top">
@@ -342,6 +460,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 </h3>
               </div>
               <div className="file-meta">
+                <span>Path: {selectedFile.path || 'root'}</span>
                 <span>Last updated: {selectedFile.time}</span>
                 <span>By: {selectedFile.changes}</span>
                 <span>Size: {fileContent.length} characters</span>
@@ -398,22 +517,9 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               )}
               
               <div className="form-group">
-                <label>Type:</label>
-                <div className="type-selector">
-                  <button
-                    type="button"
-                    className={`type-btn ${creatingType === 'file' ? 'active' : ''}`}
-                    onClick={() => setCreatingType('file')}
-                  >
-                    File
-                  </button>
-                  <button
-                    type="button"
-                    className={`type-btn ${creatingType === 'folder' ? 'active' : ''}`}
-                    onClick={() => setCreatingType('folder')}
-                  >
-                    Folder
-                  </button>
+                <label>Location:</label>
+                <div className="current-path">
+                  <strong>Current Path:</strong> {currentPath || 'root'}
                 </div>
               </div>
 
