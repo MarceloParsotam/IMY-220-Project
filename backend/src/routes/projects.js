@@ -2038,5 +2038,180 @@ router.delete('/:projectId/members/:memberId', authenticateUser, async (req, res
     });
   }
 });
+// POST /api/projects/:projectId/transfer-ownership - Transfer project ownership
+router.post('/:projectId/transfer-ownership', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { newOwnerId } = req.body;
+    const currentUserId = req.user._id;
+
+    // Validate newOwnerId
+    if (!newOwnerId || !ObjectId.isValid(newOwnerId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid new owner ID'
+      });
+    }
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Check if project exists and current user is the owner
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId),
+      userId: new ObjectId(currentUserId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found or you are not the owner'
+      });
+    }
+
+    // Check if new owner is a project member
+    const isMember = project.members && project.members.some(member => {
+      const memberId = typeof member === 'object' ? member.id : member;
+      return memberId.toString() === newOwnerId.toString();
+    });
+
+    if (!isMember && newOwnerId.toString() !== currentUserId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'New owner must be a project member'
+      });
+    }
+
+    // Check if new owner exists
+    const newOwner = await usersCollection.findOne({
+      _id: new ObjectId(newOwnerId)
+    });
+
+    if (!newOwner) {
+      return res.status(404).json({
+        success: false,
+        message: 'New owner user not found'
+      });
+    }
+
+    // Update project ownership
+    const updateResult = await projectsCollection.updateOne(
+      { _id: new ObjectId(projectId) },
+      { 
+        $set: { 
+          userId: new ObjectId(newOwnerId),
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to transfer ownership'
+      });
+    }
+
+    // Create activity for ownership transfer
+    const activitiesCollection = viewDocDB.getCollection('activities');
+    await activitiesCollection.insertOne({
+      userId: new ObjectId(currentUserId),
+      type: 'ownership_transferred',
+      title: 'Project Ownership Transferred',
+      description: `Transferred ownership of project "${project.name}" to ${newOwner.username}`,
+      date: new Date(),
+      projectId: new ObjectId(projectId),
+      metadata: {
+        projectName: project.name,
+        previousOwnerId: currentUserId,
+        previousOwnerName: req.user.username,
+        newOwnerId: newOwnerId,
+        newOwnerName: newOwner.username
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Project ownership transferred successfully',
+      newOwner: {
+        id: newOwner._id.toString(),
+        name: newOwner.name || newOwner.username,
+        username: newOwner.username
+      }
+    });
+
+  } catch (error) {
+    console.error('Error transferring project ownership:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to transfer project ownership'
+    });
+  }
+});
+
+// GET /api/projects/:projectId/transferable-members - Get members who can receive ownership
+router.get('/:projectId/transferable-members', authenticateUser, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const currentUserId = req.user._id;
+
+    const projectsCollection = viewDocDB.getCollection('projects');
+    const usersCollection = viewDocDB.getCollection('users');
+
+    // Check if project exists and current user is the owner
+    const project = await projectsCollection.findOne({
+      _id: new ObjectId(projectId),
+      userId: new ObjectId(currentUserId)
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found or you are not the owner'
+      });
+    }
+
+    // Get all project members (excluding current owner)
+    const memberIds = [];
+    
+    if (project.members && Array.isArray(project.members)) {
+      project.members.forEach(member => {
+        if (typeof member === 'object' && member.id) {
+          if (member.id.toString() !== currentUserId.toString()) {
+            memberIds.push(new ObjectId(member.id));
+          }
+        } else if (typeof member === 'string' && ObjectId.isValid(member)) {
+          if (member.toString() !== currentUserId.toString()) {
+            memberIds.push(new ObjectId(member));
+          }
+        }
+      });
+    }
+
+    // Get member details
+    const transferableMembers = await usersCollection.find({
+      _id: { $in: memberIds }
+    }).toArray();
+
+    const formattedMembers = transferableMembers.map(member => ({
+      id: member._id.toString(),
+      name: member.name || member.username,
+      username: member.username,
+      email: member.email
+    }));
+
+    res.json({
+      success: true,
+      members: formattedMembers
+    });
+
+  } catch (error) {
+    console.error('Error fetching transferable members:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch transferable members'
+    });
+  }
+});
 
 module.exports = router;
