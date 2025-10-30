@@ -1,0 +1,338 @@
+[{
+  "_id": {
+    "$oid": "68de7bc7e258f1c0321b77af"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280155"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb82ee199d5"
+  },
+  "userName": "John Developer",
+  "checkedOutAt": {
+    "$date": "2024-02-20T10:00:00.000Z"
+  },
+  "returnedAt": null,
+  "expectedReturn": {
+    "$date": "2024-02-27T10:00:00.000Z"
+  },
+  "notes": "Working on dashboard components",
+  "status": "active",
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68de7bc7e258f1c0321b77b0"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280156"
+  },
+  "userId": {
+    "$oid": "68dd0bbabf00ece23000bda4"
+  },
+  "userName": "Sarah Designer",
+  "checkedOutAt": {
+    "$date": "2024-02-19T14:30:00.000Z"
+  },
+  "returnedAt": {
+    "$date": "2024-02-20T09:15:00.000Z"
+  },
+  "expectedReturn": {
+    "$date": "2024-02-26T14:30:00.000Z"
+  },
+  "notes": "UI design updates completed",
+  "status": "returned",
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68de7bc7e258f1c0321b77b1"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280157"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb82ee199d5"
+  },
+  "userName": "John Developer",
+  "checkedOutAt": {
+    "$date": "2024-02-18T09:00:00.000Z"
+  },
+  "returnedAt": {
+    "$date": "2024-02-19T17:30:00.000Z"
+  },
+  "expectedReturn": {
+    "$date": "2024-02-25T09:00:00.000Z"
+  },
+  "notes": "Fixed authentication bugs",
+  "status": "returned",
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68de7bc7e258f1c0321b77b2"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280158"
+  },
+  "userId": {
+    "$oid": "68dd0bbabf00ece23000bda4"
+  },
+  "userName": "Sarah Designer",
+  "checkedOutAt": {
+    "$date": "2024-02-21T13:45:00.000Z"
+  },
+  "returnedAt": null,
+  "expectedReturn": {
+    "$date": "2024-02-28T13:45:00.000Z"
+  },
+  "notes": "Working on responsive design improvements",
+  "status": "active",
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68de7e57d5b53229b6de8580"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:29:59.217Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:29:58.891Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:30:03.708Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7e77d5b53229b6de8582"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:30:31.589Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:30:31.260Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:30:36.291Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f848d591f0786cf2774"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:35:00.270Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:34:59.986Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:35:05.137Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f8d8d591f0786cf2777"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:35:09.029Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:35:08.747Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:35:11.382Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fc78d591f0786cf277a"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:36:07.411Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:36:06.891Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:36:12.546Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fd48d591f0786cf277d"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:36:20.439Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:36:19.642Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:36:22.958Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fe08d591f0786cf2780"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T13:36:32.174Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T13:36:31.586Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T13:36:34.975Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8634ff9da66f8fb5c6aa"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T14:03:32.449Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T14:03:32.051Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T14:03:35.172Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de863fff9da66f8fb5c6ad"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T14:03:43.916Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T14:03:43.507Z"
+  },
+  "notes": "Working on project updates",
+  "status": "returned",
+  "isSample": false,
+  "returnNotes": "Completed work on project",
+  "returnedAt": {
+    "$date": "2025-10-02T14:03:47.085Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8648ff9da66f8fb5c6b0"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "userName": "Marcelo",
+  "checkedOutAt": {
+    "$date": "2025-10-02T14:03:52.836Z"
+  },
+  "expectedReturn": {
+    "$date": "2025-10-09T14:03:52.442Z"
+  },
+  "notes": "Working on project updates",
+  "status": "active",
+  "isSample": false
+}]
