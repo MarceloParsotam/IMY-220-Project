@@ -1,0 +1,56 @@
+[{
+  "_id": {
+    "$oid": "68de9027d7c9aac27b6d31c3"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "favoritedAt": {
+    "$date": "2025-10-02T14:45:59.677Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def388a08c42bdff5381d6"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "favoritedAt": {
+    "$date": "2025-10-02T21:50:00.719Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def555a08c42bdff5381df"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "favoritedAt": {
+    "$date": "2025-10-02T21:57:41.786Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def7138cd475af6a49444c"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "favoritedAt": {
+    "$date": "2025-10-02T22:05:07.322Z"
+  }
+}]

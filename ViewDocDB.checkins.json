@@ -1,0 +1,42 @@
+[{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280156"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "location": "Tech Hub Campus",
+  "notes": "Working on the ViewDoc platform UI components",
+  "checkinDate": {
+    "$date": "2024-02-20T08:30:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280157"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "location": "Central Library",
+  "notes": "Researching documentation best practices",
+  "checkinDate": {
+    "$date": "2024-02-19T14:15:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280158"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "location": "Coffee Shop Downtown",
+  "notes": "Meeting with client about dashboard requirements",
+  "checkinDate": {
+    "$date": "2024-02-18T10:00:00.000Z"
+  },
+  "isSample": true
+}]

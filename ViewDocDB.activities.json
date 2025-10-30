@@ -1,0 +1,2747 @@
+[{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280151"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: ViewDoc Platform",
+  "date": {
+    "$date": "2024-01-15T10:30:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280152"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_updated",
+  "title": "Updated Project",
+  "description": "Added new features to ViewDoc Platform",
+  "date": {
+    "$date": "2024-01-20T14:45:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280153"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "skill_added",
+  "title": "Added New Skills",
+  "description": "Added React and Node.js to skills",
+  "date": {
+    "$date": "2024-01-18T09:15:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280154"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "profile_updated",
+  "title": "Updated Profile",
+  "description": "Updated bio and about sections",
+  "date": {
+    "$date": "2024-02-01T16:20:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd5cf21d2d75e725280155"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: E-commerce Dashboard",
+  "date": {
+    "$date": "2024-02-15T11:00:00.000Z"
+  },
+  "isSample": true
+},
+{
+  "_id": {
+    "$oid": "68dd65a66177209e1267107e"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-01T17:32:22.067Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7e57d5b53229b6de8581"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:29:59.286Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:29:58.891Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7e77d5b53229b6de8583"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:30:31.689Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:30:31.260Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f848d591f0786cf2775"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:35:00.339Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:34:59.986Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f898d591f0786cf2776"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:35:05.205Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "checkoutDuration": 4867
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f8d8d591f0786cf2778"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:35:09.098Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:35:08.747Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7f8f8d591f0786cf2779"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:35:11.443Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "checkoutDuration": 2353
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fc78d591f0786cf277b"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:07.477Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:36:06.891Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fcc8d591f0786cf277c"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:12.615Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "checkoutDuration": 5135
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fd48d591f0786cf277e"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:20.499Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:36:19.642Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fd78d591f0786cf277f"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:23.020Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "checkoutDuration": 2519
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fe08d591f0786cf2781"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:32.236Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "expectedReturn": {
+      "$date": "2025-10-09T13:36:31.586Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de7fe38d591f0786cf2782"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T13:36:35.059Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "projectName": "Test Project Create ProflePage",
+    "checkoutDuration": 2801
+  }
+},
+{
+  "_id": {
+    "$oid": "68de840b96d432484cd1d9c2"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T13:54:19.980Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8634ff9da66f8fb5c6ab"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: ViewDoc Platform",
+  "date": {
+    "$date": "2025-10-02T14:03:32.521Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014d"
+  },
+  "metadata": {
+    "projectName": "ViewDoc Platform",
+    "expectedReturn": {
+      "$date": "2025-10-09T14:03:32.051Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8637ff9da66f8fb5c6ac"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: ViewDoc Platform",
+  "date": {
+    "$date": "2025-10-02T14:03:35.236Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014d"
+  },
+  "metadata": {
+    "projectName": "ViewDoc Platform",
+    "checkoutDuration": 2723
+  }
+},
+{
+  "_id": {
+    "$oid": "68de863fff9da66f8fb5c6ae"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T14:03:43.976Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "expectedReturn": {
+      "$date": "2025-10-09T14:03:43.507Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8643ff9da66f8fb5c6af"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_in",
+  "title": "Project Checked In",
+  "description": "Checked in project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T14:03:47.145Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "checkoutDuration": 3169
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8648ff9da66f8fb5c6b1"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_checked_out",
+  "title": "Project Checked Out",
+  "description": "Checked out project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T14:03:52.897Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "expectedReturn": {
+      "$date": "2025-10-09T14:03:52.442Z"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8ab128d163b3aac3d3fd"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T14:22:41.722Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8aba28d163b3aac3d3fe"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T14:22:50.015Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8ac128d163b3aac3d400"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T14:22:57.072Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8ad128d163b3aac3d402"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-02T14:23:13.103Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8ae428d163b3aac3d404"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T14:23:32.051Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8aec28d163b3aac3d406"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T14:23:40.605Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8af028d163b3aac3d407"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T14:23:44.613Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de8afc28d163b3aac3d408"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T14:23:56.976Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68de9027d7c9aac27b6d31c4"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T14:45:59.715Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea6a66b208b8526f878e3"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page",
+  "date": {
+    "$date": "2025-10-02T16:21:58.272Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea7236b208b8526f878e4"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:24:03.599Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea7646b208b8526f878e5"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T16:25:08.411Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea7786b208b8526f878e6"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T16:25:28.688Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea8796b208b8526f878e7"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:29:45.076Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dea8a66b208b8526f878e8"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:30:30.094Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaa689675f1a658daa9b0"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:38:00.361Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaa709675f1a658daa9b1"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:38:08.018Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaa969675f1a658daa9b2"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:38:46.667Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaa9e9675f1a658daa9b4"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:38:54.487Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaaa59675f1a658daa9b5"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T16:39:01.712Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaaa99675f1a658daa9b7"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:39:05.751Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaaaf9675f1a658daa9b8"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T16:39:11.528Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaac49675f1a658daa9b9"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:39:32.763Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deaad89675f1a658daa9ba"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T16:39:52.426Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deb20992037d79d1b05e93"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-in Message Added",
+  "description": "Added check-in message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T17:10:33.475Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkin"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deb21792037d79d1b05e94"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T17:10:47.391Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "68debf7f1578250826c26fb9"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T18:07:59.579Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deccfa07f24169224c048a"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: text.txt to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T19:05:30.815Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "text.txt",
+    "fileType": "file"
+  }
+},
+{
+  "_id": {
+    "$oid": "68decd5207f24169224c048b"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: App.js to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T19:06:58.927Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "App.js",
+    "fileType": "file"
+  }
+},
+{
+  "_id": {
+    "$oid": "68decf5125b65229f68ba5bc"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "discussion_added",
+  "title": "Discussion Added",
+  "description": "Added discussion to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T19:15:29.569Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dedaf7c0f3a50bab204660"
+  },
+  "userId": "68ddbb0abf00ece23000bda4",
+  "title": "System Announcement",
+  "description": "New collaboration features are now available! Invite friends to work on projects together.",
+  "type": "announcement",
+  "date": {
+    "$date": "2025-10-02T15:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dedaf7c0f3a50bab204661"
+  },
+  "userId": "68ddbb0abf00ece23000bda5",
+  "title": "Platform Milestone",
+  "description": "We just reached 1,000 active projects on View Doc!",
+  "type": "milestone",
+  "date": {
+    "$date": "2025-10-02T14:30:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dedaf7c0f3a50bab204662"
+  },
+  "userId": "68ddbb0abf00ece23000bda6",
+  "title": "New Feature Released",
+  "description": "Real-time collaboration is now live. Work together with your team in real-time!",
+  "type": "new_feature",
+  "date": {
+    "$date": "2025-10-02T14:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68dedaf7c0f3a50bab204663"
+  },
+  "userId": "68ddbb0abf00ece23000bda7",
+  "title": "Performance Update",
+  "description": "We've improved page load times by 60% across the platform.",
+  "type": "performance",
+  "date": {
+    "$date": "2025-10-02T13:30:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68deee8685e61cf7e814fd5b"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_deleted",
+  "title": "Project Deleted",
+  "description": "Deleted project: ViewDoc Platform",
+  "date": {
+    "$date": "2025-10-02T21:28:38.227Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014d"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def359a08c42bdff5381d4"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T21:49:13.455Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def36ba08c42bdff5381d5"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T21:49:31.728Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def388a08c42bdff5381d7"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-02T21:50:00.753Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def4aaa08c42bdff5381d8"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:54:50.799Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def4cda08c42bdff5381d9"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-in Message Added",
+  "description": "Added check-in message to project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:55:25.870Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "messageType": "checkin"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def4daa08c42bdff5381da"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:55:38.366Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def50da08c42bdff5381db"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: Docker to project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:56:29.138Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "projectName": "E-commerce Dashboard",
+    "fileName": "Docker",
+    "fileType": "file"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def535a08c42bdff5381dd"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:57:09.113Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def552a08c42bdff5381de"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_unfavorited",
+  "title": "Project Removed from Favorites",
+  "description": "Removed project from favorites",
+  "date": {
+    "$date": "2025-10-02T21:57:38.325Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def555a08c42bdff5381e0"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-02T21:57:41.818Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def6a88cd475af6a494447"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:03:20.096Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def6e68cd475af6a494448"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: Read.md to project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:04:22.632Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "metadata": {
+    "projectName": "Docker profile create",
+    "fileName": "Read.md",
+    "fileType": "file"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def6f38cd475af6a494449"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "discussion_added",
+  "title": "Discussion Added",
+  "description": "Added discussion to project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:04:35.249Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "metadata": {
+    "projectName": "Docker profile create"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def7038cd475af6a49444a"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_message_added",
+  "title": "Check-in Message Added",
+  "description": "Added check-in message to project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:04:51.633Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "metadata": {
+    "projectName": "Docker profile create",
+    "messageType": "checkin"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def70c8cd475af6a49444b"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:05:00.736Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "metadata": {
+    "projectName": "Docker profile create",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def7138cd475af6a49444d"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_favorited",
+  "title": "Project Favorited",
+  "description": "Added project to favorites: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:05:07.363Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def7308cd475af6a49444e"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Docker profile create",
+  "date": {
+    "$date": "2025-10-02T22:05:36.945Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def76e8cd475af6a494450"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Test project page creation Docker",
+  "date": {
+    "$date": "2025-10-02T22:06:38.438Z"
+  },
+  "projectId": {
+    "$oid": "68def76e8cd475af6a49444f"
+  }
+},
+{
+  "_id": {
+    "$oid": "68def7928cd475af6a494451"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_deleted",
+  "title": "Project Deleted",
+  "description": "Deleted project: Test project page creation Docker",
+  "date": {
+    "$date": "2025-10-02T22:07:14.698Z"
+  },
+  "projectId": {
+    "$oid": "68def76e8cd475af6a49444f"
+  }
+},
+{
+  "_id": {
+    "$oid": "68df786e46f047d17a5ad024"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Demo 2",
+  "date": {
+    "$date": "2025-10-03T07:17:02.784Z"
+  },
+  "projectId": {
+    "$oid": "68df786e46f047d17a5ad023"
+  }
+},
+{
+  "_id": {
+    "$oid": "68df788446f047d17a5ad025"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Demo 2",
+  "date": {
+    "$date": "2025-10-03T07:17:24.579Z"
+  },
+  "projectId": {
+    "$oid": "68df786e46f047d17a5ad023"
+  }
+},
+{
+  "_id": {
+    "$oid": "68df78d346f047d17a5ad026"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_deleted",
+  "title": "Project Deleted",
+  "description": "Deleted project: Demo 2",
+  "date": {
+    "$date": "2025-10-03T07:18:43.967Z"
+  },
+  "projectId": {
+    "$oid": "68df786e46f047d17a5ad023"
+  }
+},
+{
+  "_id": {
+    "$oid": "69027931536f820166f196c0"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Tracking App",
+  "date": {
+    "$date": "2025-10-29T20:29:37.941Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true,
+    "tagsCount": 0
+  }
+},
+{
+  "_id": {
+    "$oid": "69027d1a84ef83d7f738a0f0"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Tracking App house",
+  "date": {
+    "$date": "2025-10-29T20:46:18.410Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690334bef4f78ad6993f2888"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T09:49:50.030Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "690334fdf4f78ad6993f2889"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T09:50:53.446Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "690335627831ddb560bac24e"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T09:52:34.194Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "69033718af45f94ea5a6b7f4"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T09:59:52.766Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903372aaf45f94ea5a6b7f5"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T10:00:10.802Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690338d5b63ae206e2183811"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T10:07:17.731Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690341973be1324947d12dbd"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T10:44:39.356Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690348b83be1324947d12dbe"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T11:15:04.262Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690349043be1324947d12dbf"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T11:16:20.782Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690349283be1324947d12dc0"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Test Project Create ProflePage",
+  "date": {
+    "$date": "2025-10-30T11:16:56.948Z"
+  },
+  "projectId": {
+    "$oid": "68dd65a66177209e1267107d"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690349493be1324947d12dc1"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: E-commerce Dashboard",
+  "date": {
+    "$date": "2025-10-30T11:17:29.430Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e725280150"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690349fa3be1324947d12dc2"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Mobile Task Manager",
+  "date": {
+    "$date": "2025-10-30T11:20:26.386Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014e"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "69034a163be1324947d12dc3"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T11:20:54.960Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "69034a673be1324947d12dc4"
+  },
+  "userId": {
+    "$oid": "68def6558cd475af6a494445"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Docker profile create",
+  "date": {
+    "$date": "2025-10-30T11:22:15.421Z"
+  },
+  "projectId": {
+    "$oid": "68def6a88cd475af6a494446"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "690370b7a7b34af716522cbf"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_added",
+  "title": "Member Added to Project",
+  "description": "Added MarceloDev to project: Mobile Task Manager",
+  "date": {
+    "$date": "2025-10-30T14:05:43.622Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014e"
+  },
+  "metadata": {
+    "projectName": "Mobile Task Manager",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903741c7a39f2be1e7973b2"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_added",
+  "title": "Member Added to Project",
+  "description": "Added MarceloDev to project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:20:12.755Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903765b8171e01a76525ffa"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_removed",
+  "title": "Member Removed from Project",
+  "description": "Removed MarceloDev from project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:29:47.263Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "690376778171e01a76525ffb"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:30:15.270Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "690376be7ab514026c31c798"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_added",
+  "title": "Member Added to Project",
+  "description": "Added MarceloDev to project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:31:26.194Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "690376c47ab514026c31c799"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_removed",
+  "title": "Member Removed from Project",
+  "description": "Removed MarceloDev from project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:31:32.161Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "69037816f08240bced504328"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "member_added",
+  "title": "Member Added to Project",
+  "description": "Added MarceloDev to project: API Gateway Service",
+  "date": {
+    "$date": "2025-10-30T14:37:10.496Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "memberId": "68dd0b0abf00ece23000bda4",
+    "memberName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903781ff08240bced504329"
+  },
+  "userId": {
+    "$oid": "68dd07b78d689eb02ee199d5"
+  },
+  "type": "ownership_transferred",
+  "title": "Project Ownership Transferred",
+  "description": "Transferred ownership of project \"API Gateway Service\" to MarceloDev",
+  "date": {
+    "$date": "2025-10-30T14:37:19.037Z"
+  },
+  "projectId": {
+    "$oid": "68dd5cf21d2d75e72528014f"
+  },
+  "metadata": {
+    "projectName": "API Gateway Service",
+    "previousOwnerId": {
+      "$oid": "68dd07b78d689eb02ee199d5"
+    },
+    "previousOwnerName": "charlie_c",
+    "newOwnerId": "68dd0b0abf00ece23000bda4",
+    "newOwnerName": "MarceloDev"
+  }
+},
+{
+  "_id": {
+    "$oid": "69038014f0e3f85400622548"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added folder: src to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:11:16.997Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "src",
+    "fileType": "folder"
+  }
+},
+{
+  "_id": {
+    "$oid": "690381c533a5db8d18ddcaf8"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: test.txt to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:18:29.917Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "test.txt",
+    "fileType": "file",
+    "filePath": "src"
+  }
+},
+{
+  "_id": {
+    "$oid": "69038353e14d02af7bf80d7d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: test.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:25:07.156Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "test.txt",
+    "filePath": "src"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903836be14d02af7bf80d7e"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: test.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:25:31.521Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "test.txt",
+    "filePath": "src"
+  }
+},
+{
+  "_id": {
+    "$oid": "69038375e14d02af7bf80d7f"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: text.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:25:41.201Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "text.txt",
+    "filePath": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6903839ee14d02af7bf80d80"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: text.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:26:22.248Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "text.txt",
+    "filePath": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6903843b6a1f9b7016ca252b"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: text.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:28:59.292Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "text.txt",
+    "filePath": "",
+    "contentLength": 38
+  }
+},
+{
+  "_id": {
+    "$oid": "69038a79835f1d62793c8f93"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: test.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:55:37.564Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "test.txt",
+    "filePath": "src",
+    "contentLength": 6
+  }
+},
+{
+  "_id": {
+    "$oid": "69038b0f0e0e361c60bada24"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_updated",
+  "title": "File Updated",
+  "description": "Updated file: test.txt in project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T15:58:07.952Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "test.txt",
+    "filePath": "src",
+    "contentLength": 10
+  }
+},
+{
+  "_id": {
+    "$oid": "690394414694f71ebeaf5318"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T16:37:21.803Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "69039f32ca8d14e177de5b38"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:24:02.130Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "69039f43ca8d14e177de5b39"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:24:19.074Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a0c34acf7b8f8715abf6"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:30:43.354Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a0e14acf7b8f8715abf7"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:31:13.209Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a1bf4acf7b8f8715abf8"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T17:34:55.509Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a1d84acf7b8f8715abf9"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "file_added",
+  "title": "File Added",
+  "description": "Added file: content.txt to project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T17:35:20.589Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "projectName": "Tracking App house",
+    "fileName": "content.txt",
+    "fileType": "file",
+    "filePath": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a1df4acf7b8f8715abfa"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "file_deleted",
+  "title": "File Deleted",
+  "description": "Deleted file: content.txt from project: Tracking App house",
+  "date": {
+    "$date": "2025-10-30T17:35:27.173Z"
+  },
+  "projectId": {
+    "$oid": "69027d1a84ef83d7f738a0ef"
+  },
+  "metadata": {
+    "projectName": "Tracking App house",
+    "fileName": "content.txt",
+    "fileType": "file",
+    "filePath": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a1f04acf7b8f8715abfb"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:35:44.846Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a1f04acf7b8f8715abfc"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:35:44.990Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a23004184a52ef5362f8"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:36:48.970Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a24604184a52ef5362f9"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:37:10.833Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a281800d5dd2d0a42bf8"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:38:09.085Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a281800d5dd2d0a42bf9"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:38:09.806Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a293800d5dd2d0a42bfa"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:38:27.348Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a293800d5dd2d0a42bfb"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:38:27.559Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": false
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a2a3800d5dd2d0a42bfc"
+  },
+  "userId": {
+    "$oid": "68dd6c88329f1af7761460c6"
+  },
+  "type": "project_updated",
+  "title": "Project Updated",
+  "description": "Updated project: Tracking App",
+  "date": {
+    "$date": "2025-10-30T17:38:43.065Z"
+  },
+  "projectId": {
+    "$oid": "69027931536f820166f196bf"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903a718f86224aa2399df1d"
+  },
+  "userId": {
+    "$oid": "690234294eee03e4ecdc0581"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Dolphin SWIMS",
+  "date": {
+    "$date": "2025-10-30T17:57:44.489Z"
+  },
+  "projectId": {
+    "$oid": "6903a718f86224aa2399df1c"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c0360fce5ffaa554fe0a"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-in Message Added",
+  "description": "Added check-in message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:44:54.785Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkin"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c03f0fce5ffaa554fe0b"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:45:03.653Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c05d0fce5ffaa554fe0c"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "discussion_added",
+  "title": "Discussion Added",
+  "description": "Added discussion to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:45:33.710Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c06a0fce5ffaa554fe0d"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "file_deleted",
+  "title": "File Deleted",
+  "description": "Deleted file: App.js from project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:45:46.397Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "fileName": "App.js",
+    "fileType": "file",
+    "filePath": ""
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c0980fce5ffaa554fe0e"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:46:32.006Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c0ae0fce5ffaa554fe0f"
+  },
+  "userId": {
+    "$oid": "68dd0b0abf00ece23000bda4"
+  },
+  "type": "project_message_added",
+  "title": "Check-out Message Added",
+  "description": "Added check-out message to project: Mobile app creation from project page/ Specific page edit aswell",
+  "date": {
+    "$date": "2025-10-30T19:46:54.116Z"
+  },
+  "projectId": {
+    "$oid": "68de840b96d432484cd1d9c1"
+  },
+  "metadata": {
+    "projectName": "Mobile app creation from project page/ Specific page edit aswell",
+    "messageType": "checkout"
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c5074e6fbf415734e39e"
+  },
+  "userId": {
+    "$oid": "6903b5610c63cee542d4463c"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Rock and Stone",
+  "date": {
+    "$date": "2025-10-30T20:05:27.012Z"
+  },
+  "projectId": {
+    "$oid": "6903c4fd4e6fbf415734e39d"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c5a84e6fbf415734e3a0"
+  },
+  "userId": {
+    "$oid": "690234294eee03e4ecdc0581"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: COW?",
+  "date": {
+    "$date": "2025-10-30T20:08:08.985Z"
+  },
+  "projectId": {
+    "$oid": "6903c5a84e6fbf415734e39f"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+},
+{
+  "_id": {
+    "$oid": "6903c6234e6fbf415734e3a2"
+  },
+  "userId": {
+    "$oid": "690234294eee03e4ecdc0581"
+  },
+  "type": "project_created",
+  "title": "Created New Project",
+  "description": "Created project: Maliketh, Death of C++",
+  "date": {
+    "$date": "2025-10-30T20:10:11.188Z"
+  },
+  "projectId": {
+    "$oid": "6903c6204e6fbf415734e3a1"
+  },
+  "metadata": {
+    "hasImage": true
+  }
+}]
