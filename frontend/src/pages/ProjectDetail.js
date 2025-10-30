@@ -1,6 +1,6 @@
-// ProjectDetail.js - UPDATED
+// ProjectDetail.js - FIXED with views tracking
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ProjectHeader from '../components/projectDetails/ProjectHeader';
 import ProjectAbout from '../components/projectDetails/ProjectAbout';
 import MessagesSection from '../components/projectDetails/MessagesSection';
@@ -9,16 +9,13 @@ import EditProject from '../components/projectDetails/EditProject';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProjectDetail = () => {
-  const { projectId } = useParams(); // CHANGED: from 'id' to 'projectId'
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState('files'); // CHANGED: 'files' as default
+  const { projectId } = useParams();
+  const [activeTab, setActiveTab] = useState('files');
   const [isEditing, setIsEditing] = useState(false);
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { currentUser } = useAuth();
-
-  console.log('ProjectDetail - projectId from useParams:', projectId); // Debug log
 
   // Get token from localStorage
   const getToken = () => {
@@ -58,6 +55,9 @@ const ProjectDetail = () => {
 
       const projectData = await response.json();
       console.log('Project data received:', projectData);
+      console.log('Project image data:', projectData.image);
+      console.log('Does project have image data?', !!projectData.image);
+      console.log('Image data structure:', projectData.image);
       
       setProject(projectData);
     } catch (error) {
@@ -69,9 +69,30 @@ const ProjectDetail = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('useEffect triggered with projectId:', projectId);
+  // Increment views count when project is loaded
+  const incrementViewsCount = async () => {
+    if (!projectId) return;
     
+    try {
+      const token = getToken();
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/increment-views`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.log('Failed to increment views count');
+      }
+    } catch (error) {
+      console.error('Error incrementing views:', error);
+      // Don't show error to user - views tracking is not critical
+    }
+  };
+
+  useEffect(() => {
     if (projectId) {
       fetchProjectData(projectId);
     } else {
@@ -80,7 +101,33 @@ const ProjectDetail = () => {
     }
   }, [projectId]);
 
-  // Update all functions to use projectId instead of id
+  // Increment views when project is successfully loaded
+  useEffect(() => {
+    if (project && project._id) {
+      incrementViewsCount();
+    }
+  }, [project]); // This runs when project changes
+
+  // Get image URL - SIMPLE VERSION
+  const getImageUrl = () => {
+    if (!project) return null;
+    
+    console.log('Checking for image in project:', project);
+    
+    // Check if image data exists in the project
+    if (project.image && project.image.data) {
+      const imageUrl = `data:${project.image.contentType};base64,${project.image.data}`;
+      console.log('Created image URL from Base64 data');
+      return imageUrl;
+    }
+    
+    // If no image data, return null
+    console.log('No image data found in project');
+    return null;
+  };
+
+  const imageUrl = getImageUrl();
+
   const handleAddMessage = async (message, type) => {
     if (!project || !currentUser || !message.trim()) {
       setError('Message cannot be empty');
@@ -90,12 +137,9 @@ const ProjectDetail = () => {
     try {
       const token = getToken();
       
-      // Use the correct endpoints for messages
       const endpoint = type === 'checkin' 
         ? `http://localhost:3000/api/projects/${projectId}/checkin-message`
         : `http://localhost:3000/api/projects/${projectId}/checkout-message`;
-
-      console.log('Adding message to endpoint:', endpoint);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -111,10 +155,6 @@ const ProjectDetail = () => {
         throw new Error(errorData.message || `Failed to add ${type} message`);
       }
 
-      const result = await response.json();
-      console.log('Message added successfully:', result);
-      
-      // Refresh project data to get updated messages
       await fetchProjectData(projectId);
       
     } catch (error) {
@@ -123,30 +163,51 @@ const ProjectDetail = () => {
     }
   };
 
-  const handleSaveProject = async (updatedData) => {
+  const handleSaveProject = async (updatedData, imageFile) => {
     if (!project || !currentUser) return;
 
     try {
       const token = getToken();
+      
+      let body;
+      let headers = {
+        'Authorization': `Bearer ${token}`
+      };
+
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('projectImage', imageFile);
+        
+        Object.keys(updatedData).forEach(key => {
+          if (key === 'technologies' || key === 'members' || key === 'tags') {
+            formData.append(key, JSON.stringify(updatedData[key]));
+          } else {
+            formData.append(key, updatedData[key]);
+          }
+        });
+        
+        body = formData;
+      } else {
+        body = JSON.stringify(updatedData);
+        headers['Content-Type'] = 'application/json';
+      }
+
       const response = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData)
+        headers: headers,
+        body: body
       });
 
       if (response.ok) {
         await fetchProjectData(projectId);
         setIsEditing(false);
       } else {
-        console.error('Failed to update project');
-        setError('Failed to update project');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update project');
       }
     } catch (error) {
       console.error('Error updating project:', error);
-      setError('Error updating project');
+      setError('Error updating project: ' + error.message);
     }
   };
 
@@ -210,7 +271,6 @@ const ProjectDetail = () => {
       <div className="home-container">
         <div className="error">
           <p>Error: {error}</p>
-          <p>Project ID from URL: {projectId || 'Not found'}</p>
           <button onClick={handleRetry} className="retry-btn">
             Try Again
           </button>
@@ -224,7 +284,6 @@ const ProjectDetail = () => {
       <div className="home-container">
         <div className="error">
           <p>Project not found</p>
-          <p>ID: {projectId}</p>
         </div>
       </div>
     );
@@ -233,6 +292,27 @@ const ProjectDetail = () => {
   return (
     <div className="home-container">
       <div className="project-detail-container">
+        {/* Project Image Display - SIMPLE */}
+        {imageUrl ? (
+          <div className="project-image-section">
+            <img 
+              src={imageUrl} 
+              alt={project.name} 
+              className="project-detail-image"
+              onError={(e) => {
+                console.error('Image failed to load:', e);
+                e.target.style.display = 'none';
+              }}
+              onLoad={() => console.log('Project image loaded successfully')}
+            />
+          </div>
+        ) : (
+          <div className="no-image-placeholder">
+            <p>No project image available</p>
+            <small>Add an image when editing the project</small>
+          </div>
+        )}
+
         <div className="project-header-actions">
           <ProjectHeader 
             project={project} 

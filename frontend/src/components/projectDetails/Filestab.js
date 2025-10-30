@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+// Enhanced FilesTab.js with file editing and larger viewer
+import React, { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
 const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projectName = "project" }) => {
   const [currentPath, setCurrentPath] = useState('');
+  const [currentItems, setCurrentItems] = useState([]);
+  const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const [newFileContent, setNewFileContent] = useState('');
@@ -11,33 +14,78 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
   const [creatingType, setCreatingType] = useState('file');
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState('');
+  const [editingContent, setEditingContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [viewerSize, setViewerSize] = useState('large'); // 'compact' or 'large'
 
-  const getFilesInCurrentPath = () => {
-    return files.filter(file => {
-      const filePath = file.path || '';
-      return filePath === currentPath;
-    });
+  useEffect(() => {
+    navigateToPath(currentPath);
+  }, [files, currentPath]);
+
+  const navigateToPath = async (path) => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/navigate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          path: path
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentItems(data.items || []);
+        setBreadcrumbs(data.breadcrumbs || []);
+      } else {
+        console.error('Failed to navigate to path');
+        filterFilesByPath(path);
+      }
+    } catch (error) {
+      console.error('Error navigating:', error);
+      filterFilesByPath(path);
+    }
   };
 
-  const getSubdirectories = () => {
-    const dirs = new Set();
-    files.forEach(file => {
-      if (file.type === 'folder') {
-        dirs.add(file.name + '/');
-      }
-    });
-    return Array.from(dirs);
+  const filterFilesByPath = (path) => {
+    const filtered = files.filter(file => file.path === path);
+    setCurrentItems(filtered);
+    
+    if (!path) {
+      setBreadcrumbs([{ name: 'root', path: '' }]);
+    } else {
+      const parts = path.split('/');
+      const breadcrumbs = [{ name: 'root', path: '' }];
+      let currentPath = '';
+      parts.forEach(part => {
+        currentPath = currentPath ? `${currentPath}/${part}` : part;
+        breadcrumbs.push({
+          name: part,
+          path: currentPath
+        });
+      });
+      setBreadcrumbs(breadcrumbs);
+    }
   };
 
   const handleFileClick = async (file) => {
     if (file.type === 'folder') {
-      setCurrentPath(file.name + '/');
+      const newPath = file.path ? `${file.path}/${file.name}` : file.name;
+      setCurrentPath(newPath);
       setSelectedFile(null);
       setFileContent('');
+      setEditingContent('');
+      setIsEditing(false);
     } else {
-      // For files, fetch and display content
       setSelectedFile(file);
+      setIsEditing(false);
       try {
         const userData = JSON.parse(localStorage.getItem('user'));
         const token = userData?._id || userData?.id || '';
@@ -50,31 +98,85 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
           },
           body: JSON.stringify({
             fileName: file.name,
-            path: currentPath
+            path: file.path
           })
         });
 
         if (response.ok) {
           const fileData = await response.json();
           setFileContent(fileData.content || '');
+          setEditingContent(fileData.content || '');
         } else {
           setFileContent('// Unable to load file content');
+          setEditingContent('// Unable to load file content');
         }
       } catch (error) {
         console.error('Error fetching file content:', error);
         setFileContent('// Error loading file content');
+        setEditingContent('// Error loading file content');
       }
+    }
+  };
+
+  const handleEditFile = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingContent(fileContent);
+    setIsEditing(false);
+  };
+
+  const handleSaveFile = async () => {
+    if (!selectedFile) return;
+
+    setIsSaving(true);
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/content`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          path: selectedFile.path,
+          content: editingContent,
+          changes: currentUser?.name || currentUser?.username || 'User'
+        })
+      });
+
+      if (response.ok) {
+        setFileContent(editingContent);
+        setIsEditing(false);
+        
+        // Refresh the file list to show updated timestamp
+        if (onRefreshProject) {
+          onRefreshProject();
+        }
+        
+        alert('File saved successfully!');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save file');
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      alert(error.message || 'Error saving file. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDownloadFile = () => {
     if (!selectedFile || !fileContent) return;
 
-    // Create a blob with the file content
     const blob = new Blob([fileContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     
-    // Create a temporary anchor element to trigger download
     const a = document.createElement('a');
     a.href = url;
     a.download = selectedFile.name;
@@ -82,7 +184,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     a.click();
     document.body.removeChild(a);
     
-    // Clean up the URL object
     URL.revokeObjectURL(url);
   };
 
@@ -94,18 +195,18 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
       
       const zip = new JSZip();
       
-      // Helper function to add files to zip recursively
       const addFilesToZip = async (fileList, currentPath = '') => {
         for (const file of fileList) {
           if (file.type === 'folder') {
-            // Create folder in zip
-            const folder = zip.folder(file.name);
+            const folderPath = currentPath ? `${currentPath}/${file.name}` : file.name;
+            const folder = zip.folder(folderPath);
             
-            // For simplicity, we'll just create an empty folder
-            // In a real implementation, you might want to fetch nested files
-            folder.file('.gitkeep', ''); // Add empty file to ensure folder is created
+            const folderFiles = files.filter(f => 
+              f.path === (file.path ? `${file.path}/${file.name}` : file.name)
+            );
+            
+            await addFilesToZip(folderFiles, folderPath);
           } else {
-            // Fetch file content and add to zip
             try {
               const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files/content`, {
                 method: 'POST',
@@ -115,7 +216,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 },
                 body: JSON.stringify({
                   fileName: file.name,
-                  path: currentPath
+                  path: file.path
                 })
               });
 
@@ -126,7 +227,6 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               }
             } catch (error) {
               console.error(`Error fetching file ${file.name}:`, error);
-              // Add empty file if we can't fetch content
               const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
               zip.file(filePath, `// Unable to load content for ${file.name}`);
             }
@@ -134,13 +234,9 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         }
       };
 
-      // Add all files to the zip
-      await addFilesToZip(files);
+      await addFilesToZip(files.filter(f => !f.path));
       
-      // Generate the zip file
       const zipContent = await zip.generateAsync({ type: 'blob' });
-      
-      // Download the zip file
       saveAs(zipContent, `${projectName}-${projectId}.zip`);
       
     } catch (error) {
@@ -183,6 +279,7 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
         if (onRefreshProject) {
           onRefreshProject();
         }
+        navigateToPath(currentPath);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to add file');
@@ -195,13 +292,61 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
     }
   };
 
-  const navigateToPath = (path) => {
+  const handleDeleteFile = async (file) => {
+    if (!window.confirm(`Are you sure you want to delete ${file.type === 'folder' ? 'the folder' : 'the file'} "${file.name}"?`)) {
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/files`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          path: file.path,
+          type: file.type
+        })
+      });
+
+      if (response.ok) {
+        if (onRefreshProject) {
+          onRefreshProject();
+        }
+        navigateToPath(currentPath);
+        
+        if (selectedFile && selectedFile.name === file.name && selectedFile.path === file.path) {
+          setSelectedFile(null);
+          setFileContent('');
+          setEditingContent('');
+          setIsEditing(false);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to delete file');
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('Error deleting file. Please try again.');
+    }
+  };
+
+  const handleBreadcrumbClick = (path) => {
     setCurrentPath(path);
     setSelectedFile(null);
     setFileContent('');
+    setEditingContent('');
+    setIsEditing(false);
   };
 
-  const breadcrumbs = currentPath ? currentPath.split('/').filter(Boolean) : [];
+  const toggleViewerSize = () => {
+    setViewerSize(viewerSize === 'large' ? 'compact' : 'large');
+  };
 
   return (
     <section className="project-section">
@@ -217,6 +362,17 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               }}
             >
               Add File
+            </button>
+          )}
+          {currentUser && (
+            <button 
+              className="add-folder-btn"
+              onClick={() => {
+                setCreatingType('folder');
+                setShowAddFileModal(true);
+              }}
+            >
+              Add Folder
             </button>
           )}
           <button 
@@ -247,33 +403,20 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
 
       {/* Breadcrumbs */}
       <div className="breadcrumbs">
-        <button 
-          className="breadcrumb-item" 
-          onClick={() => {
-            setCurrentPath('');
-            setSelectedFile(null);
-            setFileContent('');
-          }}
-        >
-          root
-        </button>
-        {breadcrumbs.map((crumb, index) => {
-          const path = breadcrumbs.slice(0, index + 1).join('/') + '/';
-          return (
-            <React.Fragment key={path}>
-              <span className="breadcrumb-separator">/</span>
-              <button 
-                className="breadcrumb-item"
-                onClick={() => navigateToPath(path)}
-              >
-                {crumb}
-              </button>
-            </React.Fragment>
-          );
-        })}
+        {breadcrumbs.map((crumb, index) => (
+          <React.Fragment key={crumb.path}>
+            {index > 0 && <span className="breadcrumb-separator">/</span>}
+            <button 
+              className={`breadcrumb-item ${crumb.path === currentPath ? 'active' : ''}`}
+              onClick={() => handleBreadcrumbClick(crumb.path)}
+            >
+              {crumb.name}
+            </button>
+          </React.Fragment>
+        ))}
       </div>
 
-      <div className="files-container">
+      <div className={`files-container ${viewerSize === 'large' ? 'large-viewer' : 'compact-viewer'}`}>
         {/* Files List */}
         <div className="files-list">
           <div className="files-table">
@@ -281,13 +424,14 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               <span className="file-name">Name</span>
               <span className="file-changes">Last Updated By</span>
               <span className="file-time">Last Updated</span>
+              {currentUser && <span className="file-actions">Actions</span>}
             </div>
             
             {/* Folders first */}
-            {files.filter(f => f.type === 'folder').map((folder, index) => (
+            {currentItems.filter(f => f.type === 'folder').map((folder, index) => (
               <div 
                 key={index} 
-                className={`table-row directory-row ${selectedFile?.name === folder.name ? 'selected' : ''}`}
+                className={`table-row directory-row ${selectedFile?.name === folder.name && selectedFile?.path === folder.path ? 'selected' : ''}`}
                 onClick={() => handleFileClick(folder)}
               >
                 <span className="file-name">
@@ -298,14 +442,28 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 </span>
                 <span className="file-changes">{folder.changes}</span>
                 <span className="file-time">{folder.time}</span>
+                {currentUser && (
+                  <span className="file-actions">
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFile(folder);
+                      }}
+                      title="Delete folder"
+                    >
+                      Delete
+                    </button>
+                  </span>
+                )}
               </div>
             ))}
 
             {/* Files */}
-            {files.filter(f => f.type === 'file').map((file, index) => (
+            {currentItems.filter(f => f.type === 'file').map((file, index) => (
               <div 
                 key={index} 
-                className={`table-row ${selectedFile?.name === file.name ? 'selected' : ''}`}
+                className={`table-row ${selectedFile?.name === file.name && selectedFile?.path === file.path ? 'selected' : ''}`}
                 onClick={() => handleFileClick(file)}
               >
                 <span className="file-name">
@@ -317,19 +475,33 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                 </span>
                 <span className="file-changes">{file.changes}</span>
                 <span className="file-time">{file.time}</span>
+                {currentUser && (
+                  <span className="file-actions">
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFile(file);
+                      }}
+                      title="Delete file"
+                    >
+                      Delete
+                    </button>
+                  </span>
+                )}
               </div>
             ))}
 
-            {files.length === 0 && (
+            {currentItems.length === 0 && (
               <div className="no-files">
-                <p>No files in this project</p>
+                <p>No files or folders in this location</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* File Content Viewer */}
-        {selectedFile && (
+        {/* File Content Viewer - Enhanced with editing and size toggle */}
+        {selectedFile && selectedFile.type === 'file' && (
           <div className="file-content-panel">
             <div className="file-content-header">
               <div className="file-header-top">
@@ -340,11 +512,34 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
                   </svg>
                   {selectedFile.name}
                 </h3>
+                <div className="file-viewer-controls">
+                  <button 
+                    className="viewer-size-toggle"
+                    onClick={toggleViewerSize}
+                    title={viewerSize === 'large' ? 'Make viewer smaller' : 'Make viewer larger'}
+                  >
+                    {viewerSize === 'large' ? '⊖' : '⊕'}
+                  </button>
+                </div>
               </div>
               <div className="file-meta">
+                <span>Path: {selectedFile.path || 'root'}</span>
                 <span>Last updated: {selectedFile.time}</span>
                 <span>By: {selectedFile.changes}</span>
                 <span>Size: {fileContent.length} characters</span>
+                {currentUser && !isEditing && (
+                  <button 
+                    className="edit-btn"
+                    onClick={handleEditFile}
+                    title="Edit this file"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                  </button>
+                )}
                 <button 
                   className="download-btn"
                   onClick={handleDownloadFile}
@@ -360,9 +555,37 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
             </div>
             
             <div className="code-viewer">
-              <pre className="code-content">
-                <code>{fileContent}</code>
-              </pre>
+              {isEditing ? (
+                <div className="edit-mode">
+                  <textarea
+                    className="code-editor"
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    spellCheck="false"
+                    placeholder="Enter file content..."
+                  />
+                  <div className="edit-actions">
+                    <button 
+                      className="cancel-btn"
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="save-btn"
+                      onClick={handleSaveFile}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <pre className="code-content">
+                  <code>{fileContent}</code>
+                </pre>
+              )}
             </div>
           </div>
         )}
@@ -398,22 +621,9 @@ const FilesTab = ({ files = [], currentUser, projectId, onRefreshProject, projec
               )}
               
               <div className="form-group">
-                <label>Type:</label>
-                <div className="type-selector">
-                  <button
-                    type="button"
-                    className={`type-btn ${creatingType === 'file' ? 'active' : ''}`}
-                    onClick={() => setCreatingType('file')}
-                  >
-                    File
-                  </button>
-                  <button
-                    type="button"
-                    className={`type-btn ${creatingType === 'folder' ? 'active' : ''}`}
-                    onClick={() => setCreatingType('folder')}
-                  >
-                    Folder
-                  </button>
+                <label>Location:</label>
+                <div className="current-path">
+                  <strong>Current Path:</strong> {currentPath || 'root'}
                 </div>
               </div>
 

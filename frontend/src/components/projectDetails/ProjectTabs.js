@@ -1,6 +1,8 @@
+// Update ProjectTabs.js
 import React from 'react';
 import FilesTab from './FilesTab';
 import DiscussionTab from './DiscussionTab';
+import ProjectMembersTab from './ProjectMembersTab'; // Add this import
 
 const ProjectTabs = ({ activeTab, setActiveTab, project, currentUser, onRefreshProject }) => {
   return (
@@ -18,13 +20,19 @@ const ProjectTabs = ({ activeTab, setActiveTab, project, currentUser, onRefreshP
         >
           Discussion
         </button>
+        <button 
+          className={`tab-button ${activeTab === 'members' ? 'active' : ''}`}
+          onClick={() => setActiveTab('members')}
+        >
+          Members
+        </button>
       </div>
 
       <div className="tab-content">
         {activeTab === 'files' && (
           <FilesTab 
             files={project.files || []} 
-            currentUser={currentUser}  // Pass currentUser to FilesTab
+            currentUser={currentUser}
             projectId={project._id}
             onRefreshProject={onRefreshProject}
           />
@@ -32,8 +40,15 @@ const ProjectTabs = ({ activeTab, setActiveTab, project, currentUser, onRefreshP
         {activeTab === 'discussion' && (
           <DiscussionTab 
             discussions={project.discussions || []} 
-            currentUser={currentUser}  // Pass currentUser to DiscussionTab
+            currentUser={currentUser}
             projectId={project._id}
+            onRefreshProject={onRefreshProject}
+          />
+        )}
+        {activeTab === 'members' && (
+          <ProjectMembersTab 
+            project={project}
+            currentUser={currentUser}
             onRefreshProject={onRefreshProject}
           />
         )}

@@ -48,6 +48,18 @@ const authenticateUser = async (req, res, next) => {
     }
 };
 
+// Add to your existing auth middleware
+const isAdmin = (req, res, next) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({
+      success: false,
+      message: 'Admin access required'
+    });
+  }
+  next();
+};
+
 module.exports = {
-    authenticateUser
+  authenticateUser,
+  isAdmin
 };

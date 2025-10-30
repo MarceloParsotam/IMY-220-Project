@@ -56,7 +56,7 @@ const Friends = () => {
           username: friend.username,
           avatar: friend.avatar || '/default-avatar.png',
           title: friend.title || friend.bio || 'User',
-          projects: friend.projects ? friend.projects.length : 0,
+          projects: friend.projects || 0,
           followers: friend.followers || 0,
           skills: friend.skills || [],
           wasConnected: friend.wasConnected || false
@@ -65,7 +65,7 @@ const Friends = () => {
         setFriends(transformedFriends);
       }
 
-      // Similarly transform requests and suggestions data...
+      // Fetch requests
       const requestsResponse = await fetch(`http://localhost:3000/api/friends/requests/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -79,12 +79,13 @@ const Friends = () => {
           id: request._id || request.id,
           name: `${request.name || ''} ${request.surname || ''}`.trim() || request.username,
           avatar: request.avatar || '/default-avatar.png',
-          title: request.title || request.bio || 'User'
+          title: request.title || request.bio || 'User',
+          meta: request.meta || 'Developer'
         }));
         setRequests(transformedRequests);
       }
 
-      // Fetch and transform suggestions similarly...
+      // Fetch suggestions
       const suggestionsResponse = await fetch(`http://localhost:3000/api/friends/suggestions/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,7 +100,7 @@ const Friends = () => {
           name: `${suggestion.name || ''} ${suggestion.surname || ''}`.trim() || suggestion.username,
           avatar: suggestion.avatar || '/default-avatar.png',
           title: suggestion.title || suggestion.bio || 'User',
-          projects: suggestion.projects ? suggestion.projects.length : 0,
+          projects: suggestion.projects || 0,
           followers: suggestion.followers || 0,
           skills: suggestion.skills || [],
           wasConnected: suggestion.wasConnected || false
@@ -170,7 +171,12 @@ const Friends = () => {
         // Move from requests to friends
         const acceptedRequest = requests.find(r => r.id === requestUserId);
         setRequests(prev => prev.filter(r => r.id !== requestUserId));
-        setFriends(prev => [...prev, { ...acceptedRequest, projects: 0, followers: 0 }]);
+        setFriends(prev => [...prev, { 
+          ...acceptedRequest, 
+          projects: 0, 
+          followers: 0,
+          skills: [] 
+        }]);
         alert('Connection request accepted!');
       }
     } catch (error) {

@@ -20,6 +20,7 @@ viewDocDB.connectToDatabase().then(() => {
 // Import routes
 const routes = require('./routes');
 app.use('/api', routes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

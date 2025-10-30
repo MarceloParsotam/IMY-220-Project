@@ -1,8 +1,41 @@
-// ProjectHeader.js - Updated with action handlers
-import React from 'react';
+// ProjectHeader.js - FIXED with real views tracking
+import React, { useState, useEffect } from 'react';
 
 const ProjectHeader = ({ project, onCheckout, onCheckin, onFavorite }) => {
-  const isOwner = true; // You'll need to pass this as a prop or determine it
+  const [viewsCount, setViewsCount] = useState(0);
+  const isOwner = true;
+
+  useEffect(() => {
+    // Fetch real views count when component mounts
+    fetchViewsCount();
+  }, [project._id]);
+
+  const fetchViewsCount = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      const token = userData?._id || userData?.id || '';
+
+      // Fetch real views count from the API
+      const response = await fetch(`http://localhost:3000/api/projects/${project._id}/views`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setViewsCount(data.viewsCount || 0);
+      } else {
+        console.log('Using project.views as fallback');
+        // Fallback to project.views if the API endpoint doesn't exist yet
+        setViewsCount(project.views || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching views count:', error);
+      setViewsCount(project.views || 0);
+    }
+  };
 
   return (
     <div className="project-header">
@@ -10,7 +43,7 @@ const ProjectHeader = ({ project, onCheckout, onCheckin, onFavorite }) => {
       <div className="project-meta">
         <span className="project-username">{project.username}</span>
         <span className="project-date">Started {project.startDate}</span>
-        <span className="project-views">{project.views} views</span>
+        <span className="project-views">{viewsCount} views</span>
       </div>
       <div className="project-languages">
         {project.languages && project.languages.map((lang, index) => (

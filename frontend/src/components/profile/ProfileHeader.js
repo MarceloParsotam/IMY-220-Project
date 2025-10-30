@@ -1,11 +1,11 @@
-// components/profile/ProfileHeader.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AvatarUpload from './AvatarUpload';
 
 const ProfileHeader = ({ user, isOwnProfile, onAvatarUpdate }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [avatarTimestamp, setAvatarTimestamp] = useState(Date.now());
 
+  // Only set up carousel if user has multiple avatars
   useEffect(() => {
     if (user.avatars && user.avatars.length > 1) {
       const interval = setInterval(() => {
@@ -16,16 +16,16 @@ const ProfileHeader = ({ user, isOwnProfile, onAvatarUpdate }) => {
 
       return () => clearInterval(interval);
     }
-  }, [user.avatars]);
+  }, [user.avatars]); // Only depend on user.avatars
 
-  const handleAvatarUpdate = (newAvatarUrl) => {
+  const handleAvatarUpdate = useCallback((newAvatarUrl) => {
     setAvatarTimestamp(Date.now()); // Force re-render and cache busting
     if (onAvatarUpdate) {
       onAvatarUpdate(newAvatarUrl);
     }
-  };
+  }, [onAvatarUpdate]);
 
-  // Add cache busting to avatar URL
+  // Add cache busting to avatar URL - only if avatar exists
   const avatarUrl = user.avatar ? `${user.avatar}?t=${avatarTimestamp}` : '/default-avatar.png';
 
   return (
@@ -46,4 +46,4 @@ const ProfileHeader = ({ user, isOwnProfile, onAvatarUpdate }) => {
   );
 };
 
-export default ProfileHeader;
+export default React.memo(ProfileHeader);

@@ -1,4 +1,3 @@
-// If you have RequestItem.js, update it similarly
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -18,8 +17,7 @@ const RequestItem = ({ request, onAccept, onDecline }) => {
         />
         <div className="request-details">
           <h4 className="request-name">{request.name}</h4>
-          <p className="request-title">{request.title}</p>
-          <span className="request-mutual">5 mutual connections</span>
+          <p className="request-meta">{request.meta}</p>
         </div>
       </Link>
       
